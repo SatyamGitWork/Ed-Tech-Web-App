@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduBot - AI Study Partner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* A little custom CSS for the chat scrollbar */
+        #chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        #chat-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        #chat-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen bg-gray-100 font-sans">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md p-4 flex items-center justify-center sticky top-0 z-10">
+        <h1 class="text-2xl font-bold text-gray-800">EduBot - Your AI Study Partner</h1>
+    </header>
+
+    <!-- Chat Container -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- Messages will be injected here by JavaScript -->
+    </main>
+
+    <!-- Input Area -->
+    <footer class="bg-white border-t p-4 sticky bottom-0">
+        <div class="max-w-3xl mx-auto">
+            <form id="chat-form" class="flex items-center bg-gray-100 rounded-full p-2">
+                <input
+                    id="chat-input"
+                    type="text"
+                    placeholder="Ask an educational question..."
+                    autocomplete="off"
+                    class="w-full bg-transparent text-gray-800 focus:outline-none px-4"
+                />
+                <button
+                    id="send-button"
+                    type="submit"
+                    class="bg-blue-500 text-white rounded-full p-3 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+                >
+                    <!-- Send Icon SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                        <path d="m22 2-7 20-4-9-9-4Z" />
+                        <path d="M22 2 11 13" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </footer>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+
+        let isLoading = false;
+        let userName = "Satyam"
+        // Initial welcome message
+        const messages = [
+            { id: 1, text: `Hello! ${userName}, I'm EduBot, your AI study partner. Ask me any educational question!`, sender: 'bot' }
+        ];
+
+        // --- RENDER FUNCTION ---
+        const renderMessages = () => {
+            chatContainer.innerHTML = ''; // Clear existing messages
+            messages.forEach(message => {
+                const messageHtml = `
+                    <div class="flex items-start gap-4 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}">
+                        ${message.sender === 'bot' ? `
+                        <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg>
+                        </div>` : ''}
+
+                        <div class="max-w-xl p-4 rounded-2xl shadow-sm ${message.sender === 'user' ? 'bg-blue-500 text-white rounded-br-none' : 'bg-white text-gray-700 rounded-bl-none'}">
+                           <p class="text-sm">${message.text.replace(/\n/g, '<br />')}</p>
+                        </div>
+                        
+                        ${message.sender === 'user' ? `
+                        <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center flex-shrink-0">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>` : ''}
+                    </div>
+                `;
+                chatContainer.innerHTML += messageHtml;
+            });
+            
+            // Auto-scroll to the bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        };
+        
+        const showLoadingIndicator = () => {
+             const loadingHtml = `
+                 <div id="loading-indicator" class="flex items-start gap-4 justify-start">
+                    <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg>
+                    </div>
+                     <div class="max-w-xl p-4 rounded-2xl shadow-sm bg-white text-gray-700 rounded-bl-none">
+                        <div class="flex items-center justify-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.3s]"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.15s]"></div>
+                            <div class="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatContainer.innerHTML += loadingHtml;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        };
+
+        const hideLoadingIndicator = () => {
+            const indicator = document.getElementById('loading-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        };
+
+        // --- API CALL LOGIC ---
+        const getBotResponse = async (userMessage) => {
+            isLoading = true;
+            chatInput.disabled = true;
+            sendButton.disabled = true;
+            showLoadingIndicator();
+
+            const systemPrompt = `
+                You are 'EduBot', a friendly and highly knowledgeable AI assistant created specifically for students of all ages, from elementary to university level.
+                Your SOLE PURPOSE is to provide clear, concise, and accurate answers to educational and academic questions.
+
+                **ALLOWED TOPICS:**
+                - Subjects like Math, Science (Physics, Chemistry, Biology), History, Geography, Literature, Grammar, Social Studies, Computer Science, etc.
+                - Explaining complex concepts in simple terms.
+                - Helping with homework problems (but not doing the work for them, guide them).
+                - Providing summaries of historical events, scientific principles, or literary works.
+                - Defining academic terms.
+
+                **STRICT RULES - YOU MUST FOLLOW THESE:**
+                1.  **ONLY ANSWER EDUCATIONAL QUESTIONS.** You must strictly refuse to answer any question that is not educational or academic in nature.
+                2.  **REFUSAL PROTOCOL:** If a user asks a non-educational question (e.g., about personal opinions, celebrities, sports scores, current non-academic news, pop culture, harmful topics, or just casual chit-chat), you MUST politely decline.
+                3.  **REFUSAL MESSAGE:** Your refusal message must be friendly, brief, and guide the user back to your purpose. Use one of these responses:
+                    - "As an educational assistant, my focus is on academic subjects. Do you have a question about schoolwork I can help with?"
+                    - "I can only answer educational questions. Is there a topic from your studies you'd like to discuss?"
+                    - "My purpose is to help with learning. Let's stick to academic questions, please!"
+                4.  **DO NOT ENGAGE:** Do not get drawn into a non-educational conversation. After declining, wait for an educational question.
+                5.  **BE SAFE:** Never provide harmful, unethical, or inappropriate content.
+                6.  **TONE:** Your tone should always be encouraging, patient, and supportive.
+            `;
+
+            const apiUrl = 'http://localhost:5000/api/chat/gemini';
+
+            const payload = { userMessage };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const botText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                hideLoadingIndicator();
+                
+                if (botText) {
+                    messages.push({ id: Date.now(), text: botText, sender: 'bot' });
+                } else {
+                    messages.push({ id: Date.now(), text: "Sorry, I couldn't generate a response. Please try again.", sender: 'bot' });
+                }
+            } catch (error) {
+                console.error("Error fetching bot response:", error);
+                hideLoadingIndicator();
+                messages.push({ id: Date.now(), text: `An error occurred: ${error.message}. Please check your connection or the console.`, sender: 'bot' });
+            } finally {
+                isLoading = false;
+                chatInput.disabled = false;
+                sendButton.disabled = false;
+                chatInput.focus();
+                renderMessages();
+            }
+        };
+
+        // --- EVENT LISTENER ---
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const trimmedInput = chatInput.value.trim();
+            if (trimmedInput === '' || isLoading) return;
+
+            // Add user message to chat
+            messages.push({ id: Date.now(), text: trimmedInput, sender: 'user' });
+            renderMessages();
+
+            // Clear input and get bot response
+            getBotResponse(trimmedInput);
+            chatInput.value = '';
+        });
+
+        // Initial render on page load
+        renderMessages();
+    </script>
+</body>
+</html>
+

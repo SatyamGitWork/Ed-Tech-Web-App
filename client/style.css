@@ -329,7 +329,7 @@ body {
 
 .enroll-btn {
     display: block;
-    width: 100%;
+    width: 90%;
     padding: 1rem;
     background: linear-gradient(90deg, #2c68ff, #4f9cff);
     color: white;
