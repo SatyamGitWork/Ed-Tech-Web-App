@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCoach - Expert Coaching & Training</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <a href="index.html" class="nav-logo-link">
+                <img src="https://img.icons8.com/color/96/000000/graduation-cap.png" alt="Ed-Tech Logo"
+                    class="nav-logo-img">
+                <span class="nav-logo-text">Ed-Tech</span>
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="#courses">Courses</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <div class="auth-buttons">
+                <div id="logged-out-nav" style="display: flex; gap: 1rem;">
+                    <a href="login.html" class="cta-secondary">Login</a>
+                    <a href="Signup.html" class="cta-primary">Sign Up</a>
+                </div>
+                <div id="logged-in-nav" style="display: none; gap: 1rem;">
+                    <span id="user-name" class="nav-username"></span>
+                    <button onclick="handleLogout()" class="cta-secondary">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1>Transform Your Future with Expert Coaching</h1>
+            <p>Join thousands of successful students who achieved their dreams through our specialized coaching
+                programs.</p>
+            <div class="cta-buttons">
+                <a href="Signup.html" class="cta-primary">Start Learning</a>
+                <a href="#courses" class="cta-secondary">Explore Courses</a>
+            </div>
+        </section>
+
+        <section id="class-courses" class="class-courses">
+            <div class="section-header">
+                <h2>Class-wise Courses</h2>
+                <p>Choose your grade and start learning with our expert educators</p>
+            </div>
+            <div class="class-grid">
+                <div class="class-card">
+                    <div class="class-card-header">
+                        <div class="class-icon">
+                            <img src="https://img.icons8.com/clouds/100/000000/6.png" alt="Class 6">
+                        </div>
+                        <h3>Class 6</h3>
+                    </div>
+                    <div class="subject-list">
+                        <div class="subject-item">
+                            <span class="subject-icon">📐</span>
+                            <span>Mathematics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🧪</span>
+                            <span>Science</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">📚</span>
+                            <span>English</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🌍</span>
+                            <span>Social Studies</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#enroll" class="enroll-btn">Explore Class 6</a>
+                        <span class="course-meta">4 Subjects • Live Classes</span>
+                    </div>
+                </div>
+
+                <div class="class-card">
+                    <div class="class-card-header">
+                        <div class="class-icon">
+                            <img src="https://img.icons8.com/clouds/100/000000/7.png" alt="Class 7">
+                        </div>
+                        <h3>Class 7</h3>
+                    </div>
+                    <div class="subject-list">
+                        <div class="subject-item">
+                            <span class="subject-icon">📐</span>
+                            <span>Mathematics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🧪</span>
+                            <span>Science</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">📚</span>
+                            <span>English</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🌍</span>
+                            <span>Social Studies</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#enroll" class="enroll-btn">Explore Class 7</a>
+                        <span class="course-meta">4 Subjects • Live Classes</span>
+                    </div>
+                </div>
+
+                <div class="class-card">
+                    <div class="class-card-header">
+                        <div class="class-icon">
+                            <img src="https://img.icons8.com/clouds/100/000000/8.png" alt="Class 8">
+                        </div>
+                        <h3>Class 8</h3>
+                    </div>
+                    <div class="subject-list">
+                        <div class="subject-item">
+                            <span class="subject-icon">📐</span>
+                            <span>Mathematics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🧪</span>
+                            <span>Science</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">📚</span>
+                            <span>English</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🌍</span>
+                            <span>Social Studies</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#enroll" class="enroll-btn">Explore Class 8</a>
+                        <span class="course-meta">4 Subjects • Live Classes</span>
+                    </div>
+                </div>
+
+                <div class="class-card">
+                    <div class="class-card-header">
+                        <div class="class-icon">
+                            <img src="https://img.icons8.com/clouds/100/000000/9.png" alt="Class 9">
+                        </div>
+                        <h3>Class 9</h3>
+                    </div>
+                    <div class="subject-list">
+                        <div class="subject-item">
+                            <span class="subject-icon">📐</span>
+                            <span>Mathematics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🧪</span>
+                            <span>Science</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">📚</span>
+                            <span>English</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🌍</span>
+                            <span>Social Science</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#enroll" class="enroll-btn">Explore Class 9</a>
+                        <span class="course-meta">4 Subjects • Board Prep</span>
+                    </div>
+                </div>
+
+                <div class="class-card featured">
+                    <div class="class-card-header">
+                        <div class="class-icon">
+                            <img src="https://img.icons8.com/officel/80/10.png" alt="Class 10">
+                        </div>
+                        <h3>Class 10</h3>
+                        <span class="featured-tag">Board Year</span>
+                    </div>
+                    <div class="subject-list">
+                        <div class="subject-item">
+                            <span class="subject-icon">📐</span>
+                            <span>Mathematics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🧪</span>
+                            <span>Science</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">📚</span>
+                            <span>English</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">🌍</span>
+                            <span>Social Science</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#enroll" class="enroll-btn">Explore Class 10</a>
+                        <span class="course-meta">4 Subjects • Board Prep</span>
+                    </div>
+                </div>
+
+                <div class="class-card">
+                    <div class="class-card-header">
+                        <div class="class-icon">
+                            <img src="https://img.icons8.com/officel/80/11.png" alt="Class 11">
+                        </div>
+                        <h3>Class 11</h3>
+                    </div>
+                    <div class="subject-list">
+                        <div class="subject-item">
+                            <span class="subject-icon">⚡</span>
+                            <span>Physics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">⚗️</span>
+                            <span>Chemistry</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">📐</span>
+                            <span>Mathematics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">💻</span>
+                            <span>Computer Science</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#enroll" class="enroll-btn">Explore Class 11</a>
+                        <span class="course-meta">4 Subjects • JEE/NEET Prep</span>
+                    </div>
+                </div>
+
+                <div class="class-card">
+                    <div class="class-card-header">
+                        <div class="class-icon">
+                            <img src="https://img.icons8.com/officel/80/12.png" alt="Class 12">
+                        </div>
+                        <h3>Class 12</h3>
+                        <span class="featured-tag">Board Year</span>
+                    </div>
+                    <div class="subject-list">
+                        <div class="subject-item">
+                            <span class="subject-icon">⚡</span>
+                            <span>Physics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">⚗️</span>
+                            <span>Chemistry</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">📐</span>
+                            <span>Mathematics</span>
+                        </div>
+                        <div class="subject-item">
+                            <span class="subject-icon">💻</span>
+                            <span>Computer Science</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#enroll" class="enroll-btn">Explore Class 12</a>
+                        <span class="course-meta">4 Subjects • JEE/NEET Prep</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stats" class="stats">
+            <div class="stat-container">
+                <div class="stat-item">
+                    <h3>15k+</h3>
+                    <p>Happy Students</p>
+                </div>
+                <div class="stat-item">
+                    <h3>95%</h3>
+                    <p>Success Rate</p>
+                </div>
+                <div class="stat-item">
+                    <h3>50+</h3>
+                    <p>Expert Instructors</p>
+                </div>
+                <div class="stat-item">
+                    <h3>100+</h3>
+                    <p>Live Courses</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="courses" class="courses">
+            <h2>Popular Courses</h2>
+            <div class="course-grid">
+                <div class="course-card">
+                    <img src="https://img.icons8.com/fluency/48/laptop-coding.png" alt="Web Development">
+                    <h3>Web Development</h3>
+                    <p>Master full-stack web development with hands-on projects</p>
+                    <ul>
+                        <li>HTML, CSS, JavaScript</li>
+                        <li>React & Node.js</li>
+                        <li>24 Live Sessions</li>
+                    </ul>
+                    <a href="#enroll" class="enroll-btn">Enroll Now</a>
+                </div>
+                <div class="course-card">
+                    <img src="https://img.icons8.com/color/96/000000/artificial-intelligence.png" alt="Data Science">
+                    <h3>Data Science</h3>
+                    <p>Learn data analysis, ML & AI with industry experts</p>
+                    <ul>
+                        <li>Python & Statistics</li>
+                        <li>Machine Learning</li>
+                        <li>30 Live Sessions</li>
+                    </ul>
+                    <a href="#enroll" class="enroll-btn">Enroll Now</a>
+                </div>
+                <div class="course-card">
+                    <img src="https://img.icons8.com/color/96/000000/blockchain-technology.png" alt="Blockchain">
+                    <h3>Blockchain Development</h3>
+                    <p>Build decentralized applications and smart contracts</p>
+                    <ul>
+                        <li>Ethereum & Solidity</li>
+                        <li>Smart Contracts</li>
+                        <li>20 Live Sessions</li>
+                    </ul>
+                    <a href="#enroll" class="enroll-btn">Enroll Now</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <h2>Why Choose Our Coaching?</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <img src="https://img.icons8.com/external-flaticons-lineal-color-flat-icons/64/external-live-broadcast-winter-olympics-flaticons-lineal-color-flat-icons.png"
+                        alt="Live Classes">
+                    <h3>Live Interactive Classes</h3>
+                    <p>Learn directly from experts with real-time doubt solving</p>
+                </div>
+                <div class="feature-card">
+                    <img src="https://img.icons8.com/color/96/000000/project-management.png" alt="Projects">
+                    <h3>Industry Projects</h3>
+                    <p>Build real-world projects for your portfolio</p>
+                </div>
+                <div class="feature-card">
+                    <img src="https://img.icons8.com/color/96/000000/conference-call.png" alt="Community">
+                    <h3>Active Community</h3>
+                    <p>Join a network of learners and industry experts</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonials" class="testimonials">
+            <h2>Student Success Stories</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <img src="https://img.icons8.com/color/96/000000/user-male-circle.png" alt="Student">
+                    <p>"The coaching helped me land my dream job at a top tech company. The mentors are exceptional!"
+                    </p>
+                    <h4>Alex Johnson</h4>
+                    <span>Software Engineer</span>
+                </div>
+                <div class="testimonial-card">
+                    <img src="https://img.icons8.com/color/96/000000/user-female-circle.png" alt="Student">
+                    <p>"From beginner to professional in just 6 months. The structured curriculum made learning easy."
+                    </p>
+                    <h4>Sarah Williams</h4>
+                    <span>Data Scientist</span>
+                </div>
+                <div class="testimonial-card">
+                    <img src="https://img.icons8.com/color/96/000000/user-male-circle.png" alt="Student">
+                    <p>"The practical approach and industry projects gave me real confidence in my skills."</p>
+                    <h4>Michael Chen</h4>
+                    <span>Blockchain Developer</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <div class="section-header">
+                <h2>About Us</h2>
+                <p>Empowering Students for a Brighter Future</p>
+            </div>
+            <div class="about-container">
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3>Who We Are</h3>
+                        <p>Ed-Tech is a leading educational institution committed to providing quality education through
+                            innovative teaching methods and personalized learning experiences. With over a decade of
+                            experience, we've helped thousands of students achieve academic excellence and realize their
+                            dreams.</p>
+
+                        <h3>Our Mission</h3>
+                        <p>To empower students with knowledge, skills, and confidence needed to excel in their academic
+                            journey and beyond. We believe in making quality education accessible to all through
+                            technology-driven solutions and expert guidance.</p>
+                    </div>
+                    <div class="about-highlights">
+                        <div class="highlight-card">
+                            <img src="https://img.icons8.com/color/96/000000/student-center.png" alt="Expert Teachers">
+                            <h4>Expert Teachers</h4>
+                            <p>Learn from experienced educators with proven track records</p>
+                        </div>
+                        <div class="highlight-card">
+                            <img src="https://img.icons8.com/color/96/000000/video-call.png" alt="Interactive Learning">
+                            <h4>Interactive Learning</h4>
+                            <p>Engaging live classes with real-time doubt solving</p>
+                        </div>
+                        <div class="highlight-card">
+                            <img src="https://img.icons8.com/color/96/000000/diploma.png" alt="Success Rate">
+                            <h4>Proven Success</h4>
+                            <p>95% success rate in board examinations</p>
+                        </div>
+                        <div class="highlight-card">
+                            <img src="https://img.icons8.com/color/96/000000/computer-support.png" alt="24/7 Support">
+                            <h4>24/7 Support</h4>
+                            <p>Round-the-clock assistance for all your queries</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-cta">
+                    <h3>Ready to Start Your Journey?</h3>
+                    <p>Join our community of successful learners today</p>
+                    <div class="cta-buttons">
+                        <a href="Signup.html" class="cta-primary">Get Started</a>
+                        <a href="#contact" class="cta-secondary">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <h2>Start Your Learning Journey</h2>
+            <p>Get personalized guidance for your career growth</p>
+            <div class="contact-form">
+                <input type="text" placeholder="Your Name" required>
+                <input type="email" placeholder="Your Email" required>
+                <input type="tel" placeholder="Your Phone" required>
+                <select id="course-select" name="course" required aria-label="Select a course">
+                    <option value="">Select Course</option>
+                    <option value="web">Web Development</option>
+                    <option value="data">Data Science</option>
+                    <option value="blockchain">Blockchain</option>
+                </select>
+                <button type="submit" class="contact-btn">Request Callback</button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <a href="#courses">Courses</a>
+                <a href="#about">About Us</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <p>Email: info@educoach.com</p>
+                <p>Phone: +1 234 567 8900</p>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#" class="social-link">Facebook</a>
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+        <p class="copyright">&copy; 2025 Ed-Tech. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

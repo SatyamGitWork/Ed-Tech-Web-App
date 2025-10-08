@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ed-Tech</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+    <div id="loginbox">
+        <fieldset>
+            <legend>
+                <a href="index.html" class="logo-link">
+                    <img src="https://img.icons8.com/color/96/000000/graduation-cap.png" alt="Ed-Tech Logo" class="edtech-logo">
+                    <h2>Ed-Tech Signup</h2>
+                </a>
+            </legend>
+            <p class="edtech-tagline">Join our learning community! Unlock courses, resources, and more.</p>
+            <form onsubmit="return validateSignup(event)" class="signup-form">
+                <label for="userType">I am a:</label>
+                <select id="userType" name="userType">
+                    <option value="student">Student</option>
+                    <option value="teacher">Teacher</option>
+                </select>
+
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="Enter your full name" required>
+
+                <label for="email">Email Address</label>
+                <div class="email-otp-row">
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                    <button type="button" onclick="showotp()" class="signup-btn otp-button">Get OTP</button>
+                </div>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Create a password" required minlength="6">
+
+                <div id="otpsection">
+                    <label for="OTP">Enter OTP</label>
+                    <input type="number" id="OTP" min="100000" max="999999" placeholder="6-digit OTP">
+                </div>
+
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" required>
+
+                <label for="mobile">Mobile Number</label>
+                <input type="tel" id="mobile" placeholder="e.g. 9876543210" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
+
+                <button type="submit" class="signup-btn">Sign Up</button>
+            </form>
+        </fieldset>
+    </div>
+</body>
+
+</html>
