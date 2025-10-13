@@ -326,3 +326,123 @@ async function showotp() {
         showError('email', 'Failed to send OTP. Please try again later.');
     }
 }
+
+// Password Reset functionality
+
+// Request password reset OTP
+async function requestPasswordResetOTP(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    clearErrors();
+    
+    if (!isValidEmail(email)) {
+        showError('email', 'Please enter a valid email address');
+        return false;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showSuccess(data.message);
+            // Hide request form and show reset form
+            setTimeout(() => {
+                document.getElementById('requestOtpForm').style.display = 'none';
+                document.getElementById('resetPasswordForm').style.display = 'block';
+            }, 1500);
+        } else {
+            showError('email', data.message);
+        }
+    } catch (error) {
+        showError('email', 'Server error. Please try again later.');
+    }
+    
+    return false;
+}
+
+// Reset password with OTP
+async function resetPassword(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const otp = document.getElementById('otp').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    clearErrors();
+    let isValid = true;
+    
+    // OTP validation
+    if (!otp || otp.length !== 6) {
+        showError('otp', 'Please enter the 6-digit OTP');
+        isValid = false;
+    }
+    
+    // Password validation
+    if (newPassword.length < 6) {
+        showError('newPassword', 'Password must be at least 6 characters long');
+        isValid = false;
+    }
+    
+    // Confirm password validation
+    if (newPassword !== confirmPassword) {
+        showError('confirmPassword', 'Passwords do not match');
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        return false;
+    }
+    
+    try {
+        const response = await fetch(`${API_URL}/auth/reset-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, otp, newPassword })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showSuccess('Password reset successful! Redirecting to login...');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        } else {
+            showError('otp', data.message);
+        }
+    } catch (error) {
+        showError('otp', 'Server error. Please try again later.');
+    }
+    
+    return false;
+}
+
+// Show request OTP form again
+function showRequestOtpForm() {
+    clearErrors();
+    document.getElementById('resetPasswordForm').style.display = 'none';
+    document.getElementById('requestOtpForm').style.display = 'block';
+    document.getElementById('otp').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+}
+
+// Toggle password visibility for specific field
+function togglePasswordField(fieldId, button) {
+    const field = document.getElementById(fieldId);
+    if (field.type === 'password') {
+        field.type = 'text';
+        button.textContent = 'Hide';
+    } else {
+        field.type = 'password';
+        button.textContent = 'Show';
+    }
+}

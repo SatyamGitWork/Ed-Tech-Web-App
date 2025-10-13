@@ -8,12 +8,20 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-async function sendOTPEmail(to, otp) {
+async function sendOTPEmail(to, otp, type = 'Verification') {
+    const subject = type === 'Password Reset' 
+        ? 'Your Ed-Tech Password Reset OTP' 
+        : 'Your Ed-Tech OTP Code';
+    
+    const message = type === 'Password Reset'
+        ? `Your password reset OTP code is: ${otp}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request this, please ignore this email.`
+        : `Your OTP code is: ${otp}\n\nThis code will expire in 10 minutes.`;
+    
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to,
-        subject: 'Your Ed-Tech OTP Code',
-        text: `Your OTP code is: ${otp}`
+        subject,
+        text: message
     };
     return transporter.sendMail(mailOptions);
 }

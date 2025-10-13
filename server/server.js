@@ -23,6 +23,8 @@ app.post('/api/auth/register', authController.registerUser);
 app.post('/api/auth/login', authController.loginUser);
 app.post('/api/auth/verify-otp', authController.verifyOTP);
 app.post('/api/auth/send-otp', authController.sendOTP);
+app.post('/api/auth/forgot-password', authController.sendPasswordResetOTP);
+app.post('/api/auth/reset-password', authController.resetPassword);
 app.post('/api/chat/gemini', geminiController.askGemini);
 
 const PORT = process.env.PORT || 5000;
