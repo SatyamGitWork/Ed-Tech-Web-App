@@ -133,7 +133,7 @@ function showSuccessMessage(form, message) {
 }
 
 // API endpoints
-const API_URL = 'https://ed-tech-web-app.onrender.com' || 'http://localhost:5000/api';
+const API_URL = 'https://ed-tech-web-app-79a4.onrender.com' || 'http://localhost:5000/api';
 
 // Form validation for Login
 async function validateLogin(event) {
