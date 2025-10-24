@@ -2,36 +2,53 @@
 
 ## Architecture Overview
 
-This is a **full-stack educational platform** with a vanilla JavaScript frontend and Node.js/Express backend. The architecture follows a traditional client-server model with OTP-based email verification.
+This is a **full-stack educational platform** with a vanilla JavaScript frontend and Node.js/Express backend. The architecture follows a traditional client-server model with OTP-based email verification and **comprehensive course management**.
 
 ### Key Components
 - **Client** (`client/`): Vanilla HTML/CSS/JS (no framework) - static files served by Express
 - **Server** (`server/`): Express REST API with MongoDB, JWT auth, and Gemini AI integration
-- **Database**: MongoDB with Mongoose ODM (single `User` model)
+- **Database**: MongoDB with Mongoose ODM (User, Course, Enrollment models)
 - **AI Chatbot**: Google Gemini API with strict educational-only system prompt
+- **Course System**: Full CRUD for courses with role-based access (teachers create, students enroll)
 
 ## Critical Data Flows
 
 ### 1. Authentication Flow (OTP-Based Registration)
-**Flow**: `Signup.html` → Send OTP → Verify OTP → Register → JWT Token → localStorage
+**Flow**: `Signup.html` → Send OTP → Verify OTP → Register → JWT Token → localStorage → Role-based Redirect
 ```
 POST /api/auth/send-otp → otpStore (in-memory Map) → nodemailer
 POST /api/auth/verify-otp → validates OTP (10min expiry)
 POST /api/auth/register → bcrypt hash → MongoDB → JWT token
-POST /api/auth/login → password compare → JWT token
+POST /api/auth/login → password compare → JWT token → redirect by userType
+  - Teachers: teacher-dashboard.html
+  - Students: courses.html
 ```
 
 **Important**: OTP is stored in-memory (`utils/otpStore.js`). This will NOT persist across server restarts. Production should use Redis.
 
 ### 2. Client-Side Auth State
 Auth state managed via `localStorage`:
-- `userToken`: JWT token (used for future authenticated requests)
+- `userToken`: JWT token (used for protected API requests)
 - `userName`: Display name
 - `userType`: Either "student" or "teacher"
+- `userId`: User's MongoDB _id (used for enrollment checks)
 
-**Pattern**: Check auth on page load with `checkAuthStatus()` in `script.js`. No middleware protection yet - add auth middleware when building protected routes.
+**Pattern**: Check auth on page load with `checkAuthStatus()` in `script.js`. Protected routes use `protect` middleware + role checks.
 
-### 3. Gemini AI Chatbot Integration
+### 3. Course Management Flow
+**Teacher Flow**: `teacher-dashboard.html` → Create Course → POST `/api/courses` → MongoDB
+**Student Flow**: `courses.html` (browse) → `course-detail.html` → Enroll → POST `/api/courses/:id/enroll` → Enrollment collection
+
+**Key Routes**:
+```
+Public: GET /api/courses (browse), GET /api/courses/:id (detail)
+Teacher: POST/PUT/DELETE /api/courses (CRUD), GET /api/courses/my/created
+Student: POST /api/courses/:id/enroll, GET /api/courses/my/enrolled
+```
+
+**Authorization**: `protect` middleware verifies JWT, `teacherOnly`/`studentOnly` enforce roles.
+
+### 4. Gemini AI Chatbot Integration
 **Flow**: `chatbot.html` → POST `/api/chat/gemini` → Google Gemini API → response parsed and rendered
 
 **Key Detail**: System prompt is **duplicated** in both `geminiController.js` (server) and `chatbot.html` (client). The server-side prompt is the authoritative one. Client-side version is for reference only.
@@ -107,19 +124,24 @@ For deployment, replace with environment-based URL or relative paths.
 
 ## Missing Features / Extension Points
 
-1. **No Auth Middleware**: JWT tokens are issued but not validated on protected routes. Add middleware like:
-   ```javascript
-   const authMiddleware = require('./middleware/auth');
-   app.get('/api/protected', authMiddleware, controller);
-   ```
+1. **Auth Middleware Implemented**: JWT verification (`protect`) and role-based access (`teacherOnly`, `studentOnly`) now active.
 
 2. **Password Reset Implemented**: OTP-based password reset is now available at `/forgot-password.html`. See `PASSWORD_RESET_FEATURE.md` for details.
 
-3. **Student vs Teacher Roles**: `userType` field exists but no role-based access control.
+3. **Course Management Implemented**: Full CRUD system for courses. See `COURSE_MANAGEMENT_SYSTEM.md` for complete documentation.
 
-4. **In-Memory OTP Store**: Replace `utils/otpStore.js` with Redis for production.
+4. **Still Missing**:
+   - File upload system (AWS S3/Cloudinary) for videos, PDFs, thumbnails
+   - Payment gateway integration (Razorpay/Stripe)
+   - Assignment submission and grading
+   - Quiz/test functionality
+   - Course reviews and ratings submission UI
+   - Live class scheduling integration
+   - Email notifications for enrollments
 
-5. **No Database Migrations**: Direct Mongoose models. Schema changes require manual updates.
+5. **In-Memory OTP Store**: Replace `utils/otpStore.js` with Redis for production.
+
+6. **No Database Migrations**: Direct Mongoose models. Schema changes require manual updates.
 
 ## Common Tasks
 
@@ -154,16 +176,22 @@ Edit `controllers/geminiController.js` line ~6-30. The prompt enforces education
 server/
 ├── server.js           # Main entry point, all routes defined here
 ├── config/db.js        # MongoDB connection logic
-├── controllers/        # Route handlers (auth, gemini)
-├── models/             # Mongoose schemas (only User.js)
+├── controllers/        # Route handlers (auth, gemini, course)
+├── middleware/         # JWT auth middleware (protect, teacherOnly, studentOnly)
+├── models/             # Mongoose schemas (User, Course, Enrollment)
 └── utils/              # Helpers (OTP store, email sender)
 
 client/
 ├── index.html          # Landing page
 ├── login.html          # Login form
 ├── Signup.html         # Registration with OTP
+├── forgot-password.html # Password reset flow
 ├── chatbot.html        # Gemini AI chatbot interface
-├── script.js           # Shared JavaScript (auth, validation, API calls)
+├── teacher-dashboard.html # Teacher course management
+├── courses.html        # Public course catalog
+├── my-courses.html     # Student enrolled courses
+├── course-detail.html  # Individual course page
+├── script.js           # Shared JavaScript (auth, validation, API calls, course functions)
 └── style.css           # Shared styles
 ```
 

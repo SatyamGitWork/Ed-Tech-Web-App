@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Stream - Student View</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <a href="index.html" class="nav-logo-link">
+                <img src="https://img.icons8.com/color/96/000000/graduation-cap.png" alt="Ed-Tech Logo" class="nav-logo-img">
+                <span class="nav-logo-text">Ed-Tech</span>
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="courses.html">Courses</a>
+            <a href="my-courses.html">My Courses</a>
+            <a href="chatbot.html">AI Assistant</a>
+            <div class="auth-buttons">
+                <div id="logged-in-nav" class="logged-in-nav">
+                    <div class="notification-container" id="notification-bell">
+                        <div class="notification-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="notification-badge" id="notification-count"></span>
+                        </div>
+                        <div class="notification-dropdown" id="notification-dropdown">
+                            <div class="notification-header">
+                                <h3>Notifications</h3>
+                                <button id="mark-all-read" class="mark-all-read-btn">Mark all as read</button>
+                            </div>
+                            <div class="notification-list" id="notification-list"></div>
+                            <div class="notification-footer">
+                                <a href="notifications.html">View all notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <button id="user-name" class="nav-username" onclick="toggleUserMenu()"></button>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <a href="profile.html" class="user-dropdown-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                Profile
+                            </a>
+                            <a href="#" onclick="handleLogout(); return false;" class="user-dropdown-item logout">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="live-stream-container">
+        <!-- Stream Header -->
+        <div class="stream-header">
+            <h1 id="streamTitle">Loading...</h1>
+            <p id="courseTitle">Loading course...</p>
+        </div>
+
+        <!-- Stream Ended Notice (hidden by default) -->
+        <div id="streamEndedNotice" class="stream-ended-notice" style="display: none;">
+            <div class="notice-icon">📺</div>
+            <h2>Stream has ended</h2>
+            <p>Thank you for attending! The teacher has stopped broadcasting.</p>
+            <button onclick="window.location.href='my-courses.html'" class="btn-primary">
+                Back to My Courses
+            </button>
+        </div>
+
+        <div class="stream-layout" id="streamLayout">
+            <!-- Video Section -->
+            <div class="video-section">
+                <!-- Video Player -->
+                <div class="video-container">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <div id="loadingOverlay" class="loading-overlay">
+                        <div class="loading-spinner"></div>
+                        <p>Connecting to stream...</p>
+                    </div>
+                    <div class="video-overlay">
+                        <div class="stream-status live">
+                            <span class="status-dot"></span>
+                            <span>LIVE</span>
+                        </div>
+                        <div class="viewer-count" id="viewerCount">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <span id="viewerCountText">0 viewers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stream Info -->
+                <div class="stream-info">
+                    <div class="info-card">
+                        <h3>📚 About This Stream</h3>
+                        <p id="streamDescription">Live class in progress. Ask your questions in the chat!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Section -->
+            <div class="chat-section">
+                <div class="chat-header">
+                    <h3>💬 Live Chat</h3>
+                    <span id="chatCount">0 messages</span>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-empty">
+                        <p>No messages yet. Be the first to ask a question!</p>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        class="chat-input" 
+                        placeholder="Ask a question..."
+                        maxlength="500"
+                    >
+                    <button id="sendChatBtn" class="chat-send-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // API_URL is already defined in script.js
+        const SOCKET_URL = 'http://localhost:5000';
+        
+        let socket = null;
+        let peerConnection = null;
+        let streamKey = null;
+        let courseId = null;
+        let liveClassId = null;
+        let userName = null;
+        let userId = null;
+        let messageCount = 0;
+        let joined = false;
+
+        // WebRTC Configuration
+        const rtcConfig = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        // Get stream info from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        streamKey = urlParams.get('streamKey');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            checkAuthStatus();
+            
+            userName = localStorage.getItem('userName');
+            userId = localStorage.getItem('userId');
+
+            if (!streamKey) {
+                alert('Invalid stream link');
+                window.location.href = 'my-courses.html';
+                return;
+            }
+
+            await loadStreamDetails();
+            connectSocket();
+            setupEventListeners();
+        });
+
+        // Load stream details
+        async function loadStreamDetails() {
+            try {
+                const token = localStorage.getItem('userToken');
+                
+                if (!token) {
+                    alert('Please login to access the live stream');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                console.log('Loading stream details for key:', streamKey);
+                
+                const response = await fetch(`${API_URL}/live-stream/${streamKey}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                console.log('Stream details response:', data);
+                
+                if (response.status === 403) {
+                    // Not enrolled
+                    alert(data.message || 'You must be enrolled in this course to access the stream');
+                    window.location.href = 'courses.html';
+                    return;
+                }
+                
+                if (data.success) {
+                    const liveClass = data.liveClass;
+                    courseId = data.course._id;
+                    liveClassId = liveClass._id;
+
+                    document.getElementById('streamTitle').textContent = liveClass.title;
+                    document.getElementById('courseTitle').textContent = data.course.title;
+                    document.getElementById('streamDescription').textContent = 
+                        liveClass.description || 'Live class in progress. Ask your questions in the chat!';
+
+                    if (!liveClass.isLive) {
+                        showStreamEndedNotice();
+                    }
+                } else {
+                    alert(data.message || 'Failed to load stream');
+                    window.location.href = 'my-courses.html';
+                }
+            } catch (error) {
+                console.error('Error loading stream:', error);
+                alert('Failed to load stream details. Please try again.');
+                window.location.href = 'my-courses.html';
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.getElementById('sendChatBtn').addEventListener('click', sendMessage);
+            document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        // Connect to Socket.io
+        function connectSocket() {
+            console.log('Attempting to connect to Socket.io server:', SOCKET_URL);
+            socket = io(SOCKET_URL);
+            
+            socket.on('connect', () => {
+                console.log('✅ Connected to Socket.io server. Socket ID:', socket.id);
+                joinStream();
+            });
+            
+            socket.on('connect_error', (error) => {
+                console.error('❌ Socket.io connection error:', error);
+                alert('Failed to connect to streaming server. Please check if the server is running.');
+            });
+
+            socket.on('stream-started', async (data) => {
+                console.log('Stream started:', data);
+                document.getElementById('loadingOverlay').style.display = 'flex';
+            });
+
+            socket.on('offer', async (data) => {
+                console.log('📥 Received offer from teacher. Teacher Socket:', data.teacherSocketId);
+                await handleOffer(data);
+            });
+
+            socket.on('ice-candidate', async (data) => {
+                if (peerConnection && data.candidate) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    } catch (error) {
+                        console.error('Error adding ICE candidate:', error);
+                    }
+                }
+            });
+
+            socket.on('viewer-count-updated', ({ count }) => {
+                console.log('Viewer count updated:', count);
+                updateViewerCount(count);
+            });
+
+            socket.on('chat-message', (data) => {
+                console.log('Chat message received:', data);
+                addChatMessage(data);
+            });
+
+            socket.on('stream-ended', () => {
+                console.log('Stream ended by teacher');
+                showStreamEndedNotice();
+            });
+            
+            socket.on('error', (data) => {
+                console.error('Socket error:', data);
+                alert(data.message || 'An error occurred');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Disconnected from Socket.io server');
+            });
+        }
+
+        // Join stream
+        function joinStream() {
+            if (joined) {
+                console.log('Already joined stream');
+                return;
+            }
+            
+            if (!streamKey || !userId || !userName) {
+                console.error('Missing required data:', { streamKey, userId, userName });
+                alert('Missing user or stream information. Please login again.');
+                return;
+            }
+
+            console.log('Attempting to join stream:', { streamKey, userId, userName });
+            
+            socket.emit('join-stream', {
+                streamKey,
+                userId,
+                userName
+            });
+
+            joined = true;
+            console.log('✅ Join stream request sent');
+        }
+
+        // Handle WebRTC offer from teacher
+        async function handleOffer(data) {
+            try {
+                console.log('🔗 Creating peer connection to teacher');
+                
+                // Create peer connection
+                peerConnection = new RTCPeerConnection(rtcConfig);
+
+                // Handle incoming stream
+                peerConnection.ontrack = (event) => {
+                    console.log('✅ Received remote stream tracks:', event.streams[0].getTracks().length);
+                    const remoteVideo = document.getElementById('remoteVideo');
+                    remoteVideo.srcObject = event.streams[0];
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    console.log('✅ Video stream connected!');
+                };
+
+                // Handle ICE candidates
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        console.log('🧊 Sending ICE candidate to teacher');
+                        socket.emit('ice-candidate', {
+                            streamKey,
+                            candidate: event.candidate,
+                            targetSocketId: data.teacherSocketId
+                        });
+                    }
+                };
+                
+                // Monitor connection state
+                peerConnection.onconnectionstatechange = () => {
+                    console.log('Connection state:', peerConnection.connectionState);
+                    if (peerConnection.connectionState === 'connected') {
+                        console.log('✅ WebRTC peer connection established!');
+                    } else if (peerConnection.connectionState === 'failed') {
+                        console.error('❌ WebRTC connection failed');
+                        alert('Connection failed. Please refresh and try again.');
+                    }
+                };
+
+                // Set remote description
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                console.log('✅ Set remote description (offer)');
+
+                // Create answer
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                console.log('✅ Created answer');
+
+                // Send answer to teacher
+                socket.emit('answer', {
+                    streamKey,
+                    answer: answer,
+                    targetSocketId: data.teacherSocketId
+                });
+
+                console.log('📤 Sent answer to teacher');
+            } catch (error) {
+                console.error('❌ Error handling offer:', error);
+                alert('Failed to connect to stream. Please refresh and try again.');
+            }
+        }
+
+        // Send chat message
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            socket.emit('chat-message', {
+                streamKey,
+                userId,
+                userName,
+                message
+            });
+
+            input.value = '';
+        }
+
+        // Add chat message to UI
+        function addChatMessage(data) {
+            const chatMessages = document.getElementById('chatMessages');
+            const isEmpty = chatMessages.querySelector('.chat-empty');
+            
+            if (isEmpty) {
+                isEmpty.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            
+            // Highlight own messages
+            if (data.userId === userId) {
+                messageDiv.classList.add('own-message');
+            }
+
+            const time = new Date(data.timestamp).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <strong>${data.userName}</strong>
+                    <span class="message-time">${time}</span>
+                </div>
+                <div class="message-text">${escapeHtml(data.message)}</div>
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            messageCount++;
+            document.getElementById('chatCount').textContent = 
+                `${messageCount} ${messageCount === 1 ? 'message' : 'messages'}`;
+        }
+
+        // Update viewer count
+        function updateViewerCount(count) {
+            document.getElementById('viewerCountText').textContent = 
+                `${count} ${count === 1 ? 'viewer' : 'viewers'}`;
+        }
+
+        // Show stream ended notice
+        function showStreamEndedNotice() {
+            document.getElementById('streamLayout').style.display = 'none';
+            document.getElementById('streamEndedNotice').style.display = 'flex';
+            
+            // Close peer connection
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (joined && socket) {
+                socket.emit('leave-stream', { streamKey, userId });
+            }
+            
+            if (peerConnection) {
+                peerConnection.close();
+            }
+        });
+    </script>
+</body>
+</html>

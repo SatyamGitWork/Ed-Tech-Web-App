@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Ed-Tech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <a href="index.html" class="nav-logo-link">
+                <img src="https://img.icons8.com/color/96/000000/graduation-cap.png" alt="Ed-Tech Logo" class="nav-logo-img">
+                <span class="nav-logo-text">Ed-Tech</span>
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="courses.html">Courses</a>
+            <a href="my-courses.html" id="profile-my-courses-link">My Courses</a>
+            <a href="chatbot.html">AI Assistant</a>
+            <div class="auth-buttons">
+                <div id="logged-out-nav">
+                    <a href="login.html" class="cta-secondary">Login</a>
+                    <a href="Signup.html" class="cta-primary">Sign Up</a>
+                </div>
+                <div id="logged-in-nav">
+                    <div class="notification-container" id="notification-bell">
+                        <div class="notification-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="notification-badge" id="notification-count"></span>
+                        </div>
+                        <div class="notification-dropdown" id="notification-dropdown">
+                            <div class="notification-header">
+                                <h3>Notifications</h3>
+                                <button id="mark-all-read" class="mark-all-read-btn">Mark all as read</button>
+                            </div>
+                            <div class="notification-list" id="notification-list"></div>
+                            <div class="notification-footer">
+                                <a href="notifications.html">View all notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <button id="user-name" class="nav-username" onclick="toggleUserMenu()"></button>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <a href="profile.html" class="user-dropdown-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                Profile
+                            </a>
+                            <a href="#" onclick="handleLogout(); return false;" class="user-dropdown-item logout">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-page">
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="profile-info">
+                    <h1 id="profile-name">Loading...</h1>
+                    <p id="profile-email">Loading...</p>
+                    <span class="profile-badge" id="profile-role">Loading...</span>
+                </div>
+            </div>
+
+            <div class="profile-content">
+                <div class="profile-section">
+                    <div class="section-header">
+                        <h2>Personal Information</h2>
+                        <button class="btn-edit" id="edit-profile-btn" onclick="toggleEditMode()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Edit Profile
+                        </button>
+                    </div>
+                    <form id="profile-form" class="profile-form" onsubmit="return saveProfile(event)">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" placeholder="Your full name" readonly required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" placeholder="Your email" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile Number</label>
+                            <input type="tel" id="mobile" placeholder="Your mobile number" readonly pattern="[0-9]{10}">
+                        </div>
+                        <div class="form-group">
+                            <label for="dob">Date of Birth</label>
+                            <input type="date" id="dob" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="userType">Account Type</label>
+                            <input type="text" id="userType" readonly>
+                        </div>
+                        <div id="save-btn-container" class="form-actions" style="display: none;">
+                            <button type="submit" class="btn-save">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                Save Changes
+                            </button>
+                            <button type="button" class="btn-cancel" onclick="cancelEdit()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="profile-section">
+                    <h2>Account Statistics</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📚</div>
+                            <div class="stat-info">
+                                <h3 id="courses-count">0</h3>
+                                <p id="courses-label">Courses</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🔔</div>
+                            <div class="stat-info">
+                                <h3 id="notifications-count">0</h3>
+                                <p>Notifications</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-info">
+                                <h3 id="member-since">Loading...</h3>
+                                <p>Member Since</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h2>Change Password</h2>
+                    <form id="change-password-form" class="profile-form" onsubmit="return changePassword(event)">
+                        <div class="form-group">
+                            <label for="current-password">Current Password</label>
+                            <input type="password" id="current-password" placeholder="Enter current password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password" placeholder="Enter new password" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm New Password</label>
+                            <input type="password" id="confirm-password" placeholder="Confirm new password" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Update Password</button>
+                    </form>
+                </div>
+
+                <div class="profile-section">
+                    <h2>Danger Zone</h2>
+                    <div class="danger-zone">
+                        <div class="danger-info">
+                            <h3>Delete Account</h3>
+                            <p>Once you delete your account, there is no going back. Please be certain.</p>
+                        </div>
+                        <button class="btn-danger" onclick="confirmDeleteAccount()">Delete Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Password Confirmation Modal -->
+    <div id="password-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Your Identity</h3>
+                <button class="modal-close" onclick="closePasswordModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p>To update your profile, please confirm your current password:</p>
+                <form id="password-confirm-form" onsubmit="return confirmPassword(event)">
+                    <div class="form-group">
+                        <label for="confirm-current-password">Current Password</label>
+                        <input type="password" id="confirm-current-password" placeholder="Enter your current password" required>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">Confirm</button>
+                        <button type="button" class="btn-cancel" onclick="closePasswordModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let originalProfileData = {};
+        let isEditMode = false;
+
+        // Toggle edit mode
+        function toggleEditMode() {
+            const nameField = document.getElementById('name');
+            const mobileField = document.getElementById('mobile');
+            const dobField = document.getElementById('dob');
+            const editBtn = document.getElementById('edit-profile-btn');
+            const saveContainer = document.getElementById('save-btn-container');
+
+            if (!isEditMode) {
+                // Store original data
+                originalProfileData = {
+                    name: nameField.value,
+                    mobile: mobileField.value,
+                    dob: dobField.value
+                };
+
+                // Enable editing
+                nameField.removeAttribute('readonly');
+                mobileField.removeAttribute('readonly');
+                dobField.removeAttribute('readonly');
+
+                editBtn.style.display = 'none';
+                saveContainer.style.display = 'flex';
+                isEditMode = true;
+            }
+        }
+
+        // Cancel edit mode
+        function cancelEdit() {
+            const nameField = document.getElementById('name');
+            const mobileField = document.getElementById('mobile');
+            const dobField = document.getElementById('dob');
+            const editBtn = document.getElementById('edit-profile-btn');
+            const saveContainer = document.getElementById('save-btn-container');
+
+            // Restore original data
+            nameField.value = originalProfileData.name;
+            mobileField.value = originalProfileData.mobile;
+            dobField.value = originalProfileData.dob;
+
+            // Disable editing
+            nameField.setAttribute('readonly', 'readonly');
+            mobileField.setAttribute('readonly', 'readonly');
+            dobField.setAttribute('readonly', 'readonly');
+
+            editBtn.style.display = 'flex';
+            saveContainer.style.display = 'none';
+            isEditMode = false;
+        }
+
+        // Save profile - show password modal
+        function saveProfile(event) {
+            event.preventDefault();
+
+            // Validate mobile number
+            const mobile = document.getElementById('mobile').value;
+            if (mobile && !/^[0-9]{10}$/.test(mobile)) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
+                return false;
+            }
+
+            // Show password confirmation modal
+            document.getElementById('password-modal').style.display = 'flex';
+            return false;
+        }
+
+        // Close password modal
+        function closePasswordModal() {
+            document.getElementById('password-modal').style.display = 'none';
+            document.getElementById('password-confirm-form').reset();
+        }
+
+        // Confirm password and update profile
+        async function confirmPassword(event) {
+            event.preventDefault();
+
+            const currentPassword = document.getElementById('confirm-current-password').value;
+            const token = localStorage.getItem('userToken');
+
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Verifying...';
+
+            try {
+                const profileData = {
+                    name: document.getElementById('name').value,
+                    mobile: document.getElementById('mobile').value,
+                    dob: document.getElementById('dob').value,
+                    currentPassword: currentPassword
+                };
+
+                const response = await fetch(`${API_URL}/auth/update-profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(profileData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast('✅ Profile updated successfully!', 'success');
+                    
+                    // Update localStorage
+                    localStorage.setItem('userName', profileData.name);
+                    if (profileData.mobile) localStorage.setItem('userMobile', profileData.mobile);
+                    if (profileData.dob) localStorage.setItem('userDob', profileData.dob);
+
+                    // Update profile header
+                    document.getElementById('profile-name').textContent = profileData.name;
+                    document.getElementById('user-name').textContent = profileData.name;
+
+                    // Exit edit mode
+                    closePasswordModal();
+                    cancelEdit();
+                } else {
+                    showToast(data.message || 'Failed to update profile', 'error');
+                }
+            } catch (error) {
+                console.error('Update profile error:', error);
+                showToast('Server error. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+
+            return false;
+        }
+
+        // Load user profile
+        async function loadUserProfile() {
+            const token = localStorage.getItem('userToken');
+            const userName = localStorage.getItem('userName');
+            const userType = localStorage.getItem('userType');
+            const userId = localStorage.getItem('userId');
+
+            if (!token || !userId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // For now, use localStorage data since we don't have a profile endpoint
+            // Update profile header
+            document.getElementById('profile-name').textContent = userName || 'User';
+            document.getElementById('profile-email').textContent = localStorage.getItem('userEmail') || 'Not available';
+            document.getElementById('profile-role').textContent = userType || 'student';
+            document.getElementById('profile-role').className = `profile-badge ${userType}`;
+
+            // Update form fields with available data
+            document.getElementById('name').value = userName || 'Not available';
+            document.getElementById('email').value = localStorage.getItem('userEmail') || 'Not available';
+            document.getElementById('mobile').value = localStorage.getItem('userMobile') || 'Not provided';
+            document.getElementById('dob').value = localStorage.getItem('userDob') ? localStorage.getItem('userDob').split('T')[0] : '';
+            document.getElementById('userType').value = userType === 'teacher' ? 'Teacher' : 'Student';
+
+            // Update stats
+            if (userType === 'teacher') {
+                document.getElementById('courses-label').textContent = 'Courses Created';
+            } else {
+                document.getElementById('courses-label').textContent = 'Courses Enrolled';
+            }
+
+            // Member since - use a default if not available
+            const createdAt = localStorage.getItem('userCreatedAt');
+            if (createdAt) {
+                const memberDate = new Date(createdAt);
+                document.getElementById('member-since').textContent = memberDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            } else {
+                document.getElementById('member-since').textContent = 'Recently';
+            }
+
+            // Load course count
+            loadCourseCount(token, userType);
+            
+            // Load notification count
+            loadNotificationCount(token);
+        }
+
+        async function loadCourseCount(token, userType) {
+            try {
+                const endpoint = userType === 'teacher' ? '/courses/my/created' : '/courses/my/enrolled';
+                console.log(`Fetching courses from: ${API_URL}${endpoint}`);
+                console.log(`User type: ${userType}`);
+                
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                console.log(`Response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Courses data:', data);
+                    
+                    // Handle different response formats
+                    let courseCount = 0;
+                    if (data.count !== undefined) {
+                        // Use count property if available (both endpoints provide this)
+                        courseCount = data.count;
+                    } else if (Array.isArray(data)) {
+                        courseCount = data.length;
+                    } else if (data.courses && Array.isArray(data.courses)) {
+                        courseCount = data.courses.length;
+                    } else if (data.enrollments && Array.isArray(data.enrollments)) {
+                        courseCount = data.enrollments.length;
+                    }
+                    
+                    document.getElementById('courses-count').textContent = courseCount;
+                    console.log(`✅ Course count set to: ${courseCount}`);
+                } else {
+                    const errorData = await response.json();
+                    console.error('❌ Error response:', errorData);
+                    document.getElementById('courses-count').textContent = '0';
+                    showToast(errorData.message || 'Failed to load courses', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error loading course count:', error);
+                document.getElementById('courses-count').textContent = '0';
+            }
+        }
+
+        async function loadNotificationCount(token) {
+            try {
+                const response = await fetch(`${API_URL}/notifications/unread-count`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('notifications-count').textContent = data.count || 0;
+                }
+            } catch (error) {
+                console.error('Error loading notification count:', error);
+            }
+        }
+
+        async function changePassword(event) {
+            event.preventDefault();
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                showToast('New passwords do not match', 'error');
+                return false;
+            }
+
+            if (newPassword.length < 6) {
+                showToast('Password must be at least 6 characters long', 'error');
+                return false;
+            }
+
+            const token = localStorage.getItem('userToken');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+
+            try {
+                const response = await fetch(`${API_URL}/auth/change-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showToast('🔐 Password updated successfully!', 'success');
+                    event.target.reset();
+                } else {
+                    showToast(data.message || 'Failed to update password', 'error');
+                }
+            } catch (error) {
+                showToast('Server error. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+
+            return false;
+        }
+
+        function confirmDeleteAccount() {
+            if (confirm('⚠️ Are you absolutely sure you want to delete your account?\n\nThis action cannot be undone and all your data will be permanently deleted.')) {
+                if (confirm('This is your final warning. Type "DELETE" in the next prompt to confirm.')) {
+                    const confirmation = prompt('Type DELETE to confirm account deletion:');
+                    if (confirmation === 'DELETE') {
+                        deleteAccount();
+                    } else {
+                        showToast('Account deletion cancelled', 'info');
+                    }
+                }
+            }
+        }
+
+        async function deleteAccount() {
+            const token = localStorage.getItem('userToken');
+
+            try {
+                const response = await fetch(`${API_URL}/auth/delete-account`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    showToast('Account deleted successfully', 'success');
+                    setTimeout(() => {
+                        handleLogout();
+                    }, 2000);
+                } else {
+                    const data = await response.json();
+                    showToast(data.message || 'Failed to delete account', 'error');
+                }
+            } catch (error) {
+                showToast('Server error. Please try again.', 'error');
+            }
+        }
+
+        // Load profile on page load
+        document.addEventListener('DOMContentLoaded', loadUserProfile);
+    </script>
+</body>
+</html>

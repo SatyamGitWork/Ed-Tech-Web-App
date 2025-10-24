@@ -190,11 +190,55 @@ const resetPassword = async (req, res) => {
     }
 };
 
+// @desc    Update user profile
+// @route   PUT /api/auth/update-profile
+// @access  Private
+const updateProfile = async (req, res) => {
+    try {
+        const { name, mobile, dob, currentPassword } = req.body;
+        const userId = req.user._id;
+
+        // Get user from database
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify current password
+        const isPasswordValid = await user.matchPassword(currentPassword);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Current password is incorrect' });
+        }
+
+        // Update user fields
+        if (name) user.name = name;
+        if (mobile) user.mobile = mobile;
+        if (dob) user.dob = dob;
+
+        await user.save();
+
+        res.json({
+            message: 'Profile updated successfully',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
+                userType: user.userType
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     verifyOTP,
     sendOTP,
     sendPasswordResetOTP,
-    resetPassword
+    resetPassword,
+    updateProfile
 };
