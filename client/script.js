@@ -198,8 +198,8 @@ function showSuccessMessage(form, message) {
 
 // API endpoints
 // Switch to localhost for testing new features
-const API_URL = 'http://localhost:5000/api';
-// const API_URL = 'https://ed-tech-web-app-79a4.onrender.com/api';
+//const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://ed-tech-web-app-79a4.onrender.com/api';
 
 // Form validation for Login
 async function validateLogin(event) {
