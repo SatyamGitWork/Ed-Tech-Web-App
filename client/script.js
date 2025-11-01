@@ -1,5 +1,5 @@
 // Add these functions at the top of the file
-function checkAuthStatus() {
+async function checkAuthStatus() {
     const token = localStorage.getItem('userToken');
     const userName = localStorage.getItem('userName');
     const userType = localStorage.getItem('userType');
@@ -8,11 +8,41 @@ function checkAuthStatus() {
     const loggedInNav = document.getElementById('logged-in-nav');
     const userNameSpan = document.getElementById('user-name');
     const dashboardLink = document.getElementById('dashboard-link');
+    const aiAssistantLink = document.getElementById('ai-assistant-link');
 
     if (token && userName) {
         if (loggedOutNav) loggedOutNav.style.display = 'none';
         if (loggedInNav) loggedInNav.style.display = 'flex';
         if (userNameSpan) userNameSpan.textContent = `Welcome, ${userName}`;
+        
+        // Check AI Assistant access - only for enrolled students or teachers
+        if (aiAssistantLink) {
+            if (userType === 'teacher') {
+                // Teachers always have access
+                aiAssistantLink.style.display = 'block';
+            } else if (userType === 'student') {
+                // Students need at least one enrollment
+                try {
+                    const response = await fetch(`${API_URL}/courses/my/enrolled`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const data = await response.json();
+                    
+                    if (response.ok && data.courses && data.courses.length > 0) {
+                        aiAssistantLink.style.display = 'block';
+                    } else {
+                        aiAssistantLink.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error checking enrollments:', error);
+                    aiAssistantLink.style.display = 'none';
+                }
+            } else {
+                aiAssistantLink.style.display = 'none';
+            }
+        }
         
         // Set dashboard link based on user type
         if (dashboardLink) {
@@ -43,6 +73,9 @@ function checkAuthStatus() {
         if (loggedOutNav) loggedOutNav.style.display = 'flex';
         if (loggedInNav) loggedInNav.style.display = 'none';
         if (dashboardLink) dashboardLink.style.display = 'none';
+        
+        // Hide AI Assistant link for non-logged users
+        if (aiAssistantLink) aiAssistantLink.style.display = 'none';
     }
 }
 
@@ -100,21 +133,52 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Contact Form Handling
-    const contactForm = document.querySelector('.contact-form');
+    const contactForm = document.querySelector('#contactForm');
     if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
+        contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Collect form data
-            const formData = new FormData(contactForm);
-            const data = Object.fromEntries(formData.entries());
+            const name = document.getElementById('contact-name').value;
+            const email = document.getElementById('contact-email').value;
+            const phone = document.getElementById('contact-phone').value;
+            const course = document.getElementById('contact-course').value;
+            const message = document.getElementById('contact-message')?.value || '';
             
-            // Simulate form submission
-            console.log('Sending inquiry:', data);
-            showSuccessMessage(contactForm, 'Thank you for your interest! We\'ll contact you soon.');
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
             
-            // Reset form
-            contactForm.reset();
+            try {
+                // Disable button and show loading
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+                
+                // Send to backend API
+                const response = await fetch(`${API_URL}/contact`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, phone, course, message })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Show success message
+                    alert('✅ Thank you for your inquiry! We will get back to you soon.');
+                    contactForm.reset();
+                } else {
+                    alert('❌ ' + (data.message || 'Failed to submit. Please try again.'));
+                }
+            } catch (error) {
+                console.error('Error submitting contact form:', error);
+                alert('❌ Something went wrong. Please try again later.');
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
         });
     }
 
@@ -133,7 +197,9 @@ function showSuccessMessage(form, message) {
 }
 
 // API endpoints
-const API_URL = 'https://ed-tech-web-app-79a4.onrender.com/api' || 'http://localhost:5000/api';
+// Switch to localhost for testing new features
+const API_URL = 'http://localhost:5000/api';
+// const API_URL = 'https://ed-tech-web-app-79a4.onrender.com/api';
 
 // Form validation for Login
 async function validateLogin(event) {
@@ -180,8 +246,12 @@ async function validateLogin(event) {
                 // Store the token and user info
                 localStorage.setItem('userToken', data.token);
                 localStorage.setItem('userName', data.name);
+                localStorage.setItem('userEmail', data.email);
                 localStorage.setItem('userType', data.userType);
                 localStorage.setItem('userId', data._id);
+                localStorage.setItem('userMobile', data.mobile || '');
+                localStorage.setItem('userDob', data.dob || '');
+                localStorage.setItem('userCreatedAt', data.createdAt || '');
 
                 showToast('🎉 Login successful! Redirecting to your dashboard...', 'success');
                 setTimeout(() => {
@@ -207,15 +277,11 @@ async function validateLogin(event) {
     return false;
 }
 
-// Form validation for Signup
+// Form validation for Signup (Students)
 async function validateSignup(event) {
     event.preventDefault();
     
-    const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
-    const mobile = document.getElementById('mobile').value;
-    const dob = document.getElementById('dob').value;
-    const userType = document.getElementById('userType').value;
     const password = document.getElementById('password').value;
     const otp = document.getElementById('OTP').value;
     let isValid = true;
@@ -223,27 +289,9 @@ async function validateSignup(event) {
     // Clear previous errors
     clearErrors();
     
-    // Name validation
-    if (name.length < 2) {
-        showToast('Name must be at least 2 characters long', 'error');
-        isValid = false;
-    }
-    
     // Email validation
     if (!isValidEmail(email)) {
         showToast('Please enter a valid email address', 'error');
-        isValid = false;
-    }
-    
-    // Mobile validation
-    if (!isValidMobile(mobile)) {
-        showToast('Please enter a valid 10-digit mobile number', 'error');
-        isValid = false;
-    }
-    
-    // DOB validation
-    if (!isValidAge(dob)) {
-        showToast('You must be at least 13 years old to register', 'error');
         isValid = false;
     }
 
@@ -282,39 +330,26 @@ async function validateSignup(event) {
                 return false;
             }
             
-            // Proceed with registration
+            // Register the student
             const response = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name,
+                    name: email.split('@')[0], // Use email prefix as default name
                     email,
                     password,
-                    mobile,
-                    dob,
-                    userType
-                }),
+                    userType: 'student', // Always student for this form
+                    mobile: '', // Optional for students
+                    dob: new Date().toISOString() // Default date
+                })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Store the token and user info
-                localStorage.setItem('userToken', data.token);
-                localStorage.setItem('userName', data.name);
-                localStorage.setItem('userType', data.userType);
-                localStorage.setItem('userId', data._id);
-
-                showToast('🎉 Sign up successful! Redirecting to your dashboard...', 'success');
+                showToast('🎉 Account created successfully! Redirecting to login...', 'success');
                 setTimeout(() => {
-                    // Redirect based on user type
-                    if (data.userType === 'teacher') {
-                        window.location.href = 'teacher-dashboard.html';
-                    } else {
-                        window.location.href = 'courses.html';
-                    }
+                    window.location.href = 'login.html';
                 }, 2000);
             } else {
                 showToast(data.message || 'Registration failed. Please try again.', 'error');
@@ -1339,13 +1374,22 @@ function displayCourseDetail(course) {
     const userType = localStorage.getItem('userType');
     const isEnrolled = course.enrolledStudents?.some(student => student._id === localStorage.getItem('userId'));
     
-    const enrollButton = !token 
-        ? '<a href="login.html" class="cta-primary">Login to Enroll</a>'
-        : userType === 'teacher'
-        ? '<p class="info-message">Teachers cannot enroll in courses</p>'
-        : isEnrolled
-        ? '<button class="btn-enrolled" disabled>Already Enrolled</button>'
-        : `<button onclick="enrollInCourseNow('${course._id}')" class="cta-primary">Enroll Now</button>`;
+    // Determine enrollment button based on user state and course price
+    let enrollButton;
+    if (!token) {
+        enrollButton = '<a href="login.html" class="cta-primary">Login to Enroll</a>';
+    } else if (userType === 'teacher') {
+        enrollButton = '<p class="info-message">Teachers cannot enroll in courses</p>';
+    } else if (isEnrolled) {
+        enrollButton = '<button class="btn-enrolled" disabled>✓ Already Enrolled</button>';
+    } else {
+        // Show "Enroll Now (Free)" or "Buy Now - ₹499"
+        if (course.price === 0) {
+            enrollButton = `<button onclick="handleCourseEnrollment('${course._id}', '${course.title}', ${course.price})" class="cta-primary">Enroll Now (Free)</button>`;
+        } else {
+            enrollButton = `<button onclick="handleCourseEnrollment('${course._id}', '${course.title}', ${course.price})" class="cta-primary">Buy Now - ₹${course.price}</button>`;
+        }
+    }
     
     const content = `
         <div class="course-detail-header">
@@ -1363,7 +1407,7 @@ function displayCourseDetail(course) {
                     <span>⏱️ ${course.duration || 0} hours</span>
                 </div>
                 <div class="course-price-section">
-                    <span class="course-price-large">${course.price === 0 ? 'Free' : '₹' + course.price}</span>
+                    <span class="course-price-large">${course.price === 0 ? 'FREE' : '₹' + course.price}</span>
                     ${enrollButton}
                 </div>
             </div>
@@ -1397,6 +1441,14 @@ function displayCourseDetail(course) {
             ${course.content && course.content.length > 0 ? `
             <div class="course-section">
                 <h2>Course Content</h2>
+                ${!token ? `
+                    <div class="login-to-view-content">
+                        <div class="lock-icon">🔒</div>
+                        <h3>Login to View Course Content</h3>
+                        <p>Please login to see the full course curriculum and materials.</p>
+                        <a href="login.html" class="cta-primary">Login Now</a>
+                    </div>
+                ` : `
                 <div class="course-content-list">
                     ${course.content.map((item, index) => `
                         <div class="content-item-student">
@@ -1428,8 +1480,9 @@ function displayCourseDetail(course) {
                         </div>
                     `).join('')}
                 </div>
+                `}
             </div>
-            ` : '<p class="info-message">Course content will be available soon</p>'}
+            ` : !token ? '' : '<p class="info-message">Course content will be available soon</p>'}
             
             ${isEnrolled && course.liveClasses && course.liveClasses.length > 0 ? `
             <div class="course-section">

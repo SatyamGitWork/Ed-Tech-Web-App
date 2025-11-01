@@ -147,6 +147,25 @@
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthStatus();
             loadAllCourses();
+            
+            // Check for class parameter in URL and auto-filter
+            const urlParams = new URLSearchParams(window.location.search);
+            const classParam = urlParams.get('class');
+            
+            if (classParam) {
+                // Set the filter dropdown to the class from URL
+                const filterClassSelect = document.getElementById('filterClass');
+                if (filterClassSelect) {
+                    filterClassSelect.value = classParam;
+                    
+                    // Wait for courses to load, then apply filter
+                    setTimeout(() => {
+                        filterCourses();
+                        // Scroll to courses section
+                        document.querySelector('.courses-results')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 500);
+                }
+            }
         });
     </script>
 </body>

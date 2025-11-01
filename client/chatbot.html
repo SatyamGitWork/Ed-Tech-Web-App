@@ -61,17 +61,77 @@
     </footer>
 
     <script>
+        // Check if student has enrolled in at least one course
+        async function checkChatbotAccess() {
+            const token = localStorage.getItem('userToken');
+            const userType = localStorage.getItem('userType');
+            
+            if (!token) {
+                window.location.href = 'login.html';
+                return false;
+            }
+            
+            if (userType === 'teacher') {
+                return true; // Teachers have access
+            }
+            
+            if (userType === 'student') {
+                try {
+                    const response = await fetch('http://localhost:5000/api/courses/my/enrolled', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const data = await response.json();
+                    
+                    if (!response.ok || !data.courses || data.courses.length === 0) {
+                        // Student has no enrollments
+                        document.getElementById('chat-container').innerHTML = `
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 3rem; text-align: center;">
+                                <div style="font-size: 5rem; margin-bottom: 1rem;">🔒</div>
+                                <h2 style="color: #333; margin-bottom: 1rem;">AI Assistant Not Available</h2>
+                                <p style="color: #666; font-size: 1.1rem; max-width: 500px; margin-bottom: 2rem;">
+                                    The AI Assistant is only available for students who are enrolled in at least one course.
+                                </p>
+                                <a href="courses.html" style="background: #667eea; color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s;">
+                                    Browse Courses
+                                </a>
+                            </div>
+                        `;
+                        document.getElementById('chat-form').style.display = 'none';
+                        return false;
+                    }
+                    return true;
+                } catch (error) {
+                    console.error('Error checking enrollment:', error);
+                    return false;
+                }
+            }
+            
+            return false;
+        }
+        
         const chatContainer = document.getElementById('chat-container');
         const chatForm = document.getElementById('chat-form');
         const chatInput = document.getElementById('chat-input');
         const sendButton = document.getElementById('send-button');
 
         let isLoading = false;
-        let userName = "Satyam"
-        // Initial welcome message
+        
+        // Get user name from localStorage
+        const userName = localStorage.getItem('userName') || 'Student';
+        
+        // Initial welcome message with user's name
         const messages = [
-            { id: 1, text: `Hello! ${userName}, I'm EduBot, your AI study partner. Ask me any educational question!`, sender: 'bot' }
+            { id: 1, text: `Hello, ${userName}! I'm EduBot, your AI study partner. Ask me any educational question!`, sender: 'bot' }
         ];
+
+        // Check access on page load
+        checkChatbotAccess().then(hasAccess => {
+            if (hasAccess) {
+                renderMessages();
+            }
+        });
 
         // --- RENDER FUNCTION ---
         const renderMessages = () => {

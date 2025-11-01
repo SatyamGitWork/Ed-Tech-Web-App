@@ -10,32 +10,80 @@ const courseController = require('./controllers/courseController');
 const uploadController = require('./controllers/uploadController');
 const oauthController = require('./controllers/oauthController');
 const notificationController = require('./controllers/notificationController');
+const contactController = require('./controllers/contactController');
+const paymentController = require('./controllers/paymentController');
 const { uploadVideo, uploadDocument, uploadImage } = require('./config/googleDrive');
-const { protect, teacherOnly, studentOnly } = require('./middleware/auth');
+const { protect, teacherOnly, studentOnly, adminOnly } = require('./middleware/auth');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
+        origin: process.env.CLIENT_URL || "http://localhost:5000",
+        methods: ["GET", "POST"],
+        credentials: true
+    },
+    pingTimeout: 60000,
+    pingInterval: 25000
 });
 
 // Make io accessible to routes
 app.set('io', io);
 
-app.use(cors({
-    "origin":"*"
-}))
+// Security: Disable x-powered-by header
+app.disable('x-powered-by');
 
 // Connect to MongoDB
 connectDB();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Middleware - Apply in correct order
+// Allow multiple origins (localhost and production)
+const allowedOrigins = [
+    'http://localhost:5000',
+    'http://127.0.0.1:5500',
+    'http://localhost:5500',
+    'https://ed-tech-web-app-79a4.onrender.com'
+];
+
+app.use(cors({
+    origin: function(origin, callback) {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Body parser with size limits to prevent DoS
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve static files
 app.use(express.static('../client'));
+
+// Request logging middleware (for development)
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+        next();
+    });
+}
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ 
+        success: true, 
+        message: 'Server is running',
+        timestamp: new Date().toISOString()
+    });
+});
 
 // Auth Routes
 app.post('/api/auth/register', authController.registerUser);
@@ -45,6 +93,7 @@ app.post('/api/auth/send-otp', authController.sendOTP);
 app.post('/api/auth/forgot-password', authController.sendPasswordResetOTP);
 app.post('/api/auth/reset-password', authController.resetPassword);
 app.put('/api/auth/update-profile', protect, authController.updateProfile);
+app.get('/api/auth/profile', protect, authController.getProfile);
 
 // Google OAuth Routes (for Drive authorization)
 app.get('/auth/google', oauthController.getAuthUrl);
@@ -98,8 +147,29 @@ app.put('/api/notifications/:id/read', protect, notificationController.markAsRea
 app.put('/api/notifications/read-all', protect, notificationController.markAllAsRead);
 app.delete('/api/notifications/:id', protect, notificationController.deleteNotification);
 app.get('/api/notifications/unread-count', protect, notificationController.getUnreadCount);
+
+// Contact Form Routes
+app.post('/api/contact', contactController.createContact);
+app.get('/api/contact', protect, teacherOnly, contactController.getAllContacts);
+app.put('/api/contact/:id', protect, teacherOnly, contactController.updateContactStatus);
+app.delete('/api/contact/:id', protect, teacherOnly, contactController.deleteContact);
 app.get('/api/notifications/preferences', protect, notificationController.getPreferences);
 app.put('/api/notifications/preferences', protect, notificationController.updatePreferences);
+
+// Payment Routes
+app.post('/api/payments/create-order', protect, studentOnly, paymentController.createOrder);
+app.post('/api/payments/verify', protect, studentOnly, paymentController.verifyPayment);
+app.post('/api/payments/payment-failed', protect, paymentController.paymentFailed);
+app.post('/api/payments/check-status', protect, paymentController.checkPaymentStatus);
+app.post('/api/payments/cancel-pending', protect, paymentController.cancelPendingPayment);
+app.get('/api/payments/my-payments', protect, paymentController.getMyPayments);
+app.get('/api/payments/order/:orderId', protect, paymentController.getPaymentByOrderId);
+app.get('/api/payments/all', protect, teacherOnly, paymentController.getAllPayments);
+
+// Admin-only payment security routes
+app.get('/api/payments/verify-integrity/:orderId', protect, adminOnly, paymentController.verifyPaymentIntegrity);
+app.get('/api/payments/admin/:orderId', protect, adminOnly, paymentController.getPaymentDetailAdmin);
+app.put('/api/payments/:id/status', protect, adminOnly, paymentController.updatePaymentStatus); // Blocked endpoint
 
 // Test endpoint to check Google Drive connection
 app.get('/api/test/drive', async (req, res) => {
@@ -315,5 +385,83 @@ io.on('connection', (socket) => {
     });
 });
 
+// 404 handler - must be after all routes
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Route not found'
+    });
+});
+
+// Global error handler - must be last middleware
+app.use((err, req, res, next) => {
+    console.error('Global error handler:', err.stack);
+    
+    // Mongoose validation error
+    if (err.name === 'ValidationError') {
+        const errors = Object.values(err.errors).map(e => e.message);
+        return res.status(400).json({
+            success: false,
+            message: 'Validation error',
+            errors
+        });
+    }
+    
+    // Mongoose cast error (invalid ObjectId)
+    if (err.name === 'CastError') {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid ID format'
+        });
+    }
+    
+    // JWT errors
+    if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid token'
+        });
+    }
+    
+    if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({
+            success: false,
+            message: 'Token expired'
+        });
+    }
+    
+    // Duplicate key error (MongoDB)
+    if (err.code === 11000) {
+        const field = Object.keys(err.keyPattern)[0];
+        return res.status(400).json({
+            success: false,
+            message: `${field} already exists`
+        });
+    }
+    
+    // Default error
+    res.status(err.statusCode || 500).json({
+        success: false,
+        message: err.message || 'Internal server error'
+    });
+});
+
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`✅ MongoDB connected`);
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+    console.error('❌ Unhandled Promise Rejection:', err);
+    // Close server & exit process
+    server.close(() => process.exit(1));
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err);
+    process.exit(1);
+});

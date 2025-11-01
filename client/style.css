@@ -132,6 +132,27 @@ body {
     box-shadow: 0 2px 8px rgba(44, 104, 255, 0.2);
 }
 
+.cta-teacher {
+    padding: 0.8rem 1.8rem;
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    display: inline-block;
+}
+
+.cta-teacher:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+}
+
+.cta-teacher:active {
+    transform: translateY(-1px);
+}
+
 .cta-secondary {
     background: rgba(255, 255, 255, 0.9);
     color: #2c68ff;
@@ -758,18 +779,29 @@ body {
 }
 
 .contact-form input,
-.contact-form select {
+.contact-form select,
+.contact-form textarea {
     padding: 1rem;
     margin-bottom: 1rem;
     border: 2px solid #e2e8f0;
     border-radius: 10px;
     transition: all 0.3s ease;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .contact-form input:focus,
-.contact-form select:focus {
+.contact-form select:focus,
+.contact-form textarea:focus {
     border-color: #2c68ff;
     box-shadow: 0 0 0 3px rgba(44, 104, 255, 0.1);
+    outline: none;
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 80px;
 }
 
 .contact-btn {
@@ -2595,6 +2627,62 @@ input:focus, select:focus {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+}
+
+/* Login to View Content Section */
+.login-to-view-content {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    padding: 3rem 2rem;
+    border-radius: 15px;
+    text-align: center;
+    border: 2px dashed #2c68ff;
+    margin: 2rem 0;
+}
+
+.login-to-view-content .lock-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: lockShake 2s ease-in-out infinite;
+}
+
+@keyframes lockShake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+}
+
+.login-to-view-content h3 {
+    color: #1a2a4f;
+    font-size: 1.8rem;
+    margin: 1rem 0;
+    font-weight: 700;
+}
+
+.login-to-view-content p {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.login-to-view-content .cta-primary {
+    display: inline-block;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #2c68ff 0%, #667eea 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(44, 104, 255, 0.3);
+}
+
+.login-to-view-content .cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(44, 104, 255, 0.5);
 }
 
 /* ==========================

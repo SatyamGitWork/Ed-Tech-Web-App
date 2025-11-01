@@ -45,22 +45,29 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Create user
-        const user = await User.create({
-            name,
+        // Create user with only provided fields
+        const userData = {
             email,
             password,
-            dob,
-            mobile,
-            userType
-        });
+            userType: userType || 'student'
+        };
+
+        // Add optional fields if provided
+        if (name) userData.name = name;
+        if (dob) userData.dob = dob;
+        if (mobile) userData.mobile = mobile;
+
+        const user = await User.create(userData);
 
         if (user) {
             res.status(201).json({
                 _id: user._id,
-                name: user.name,
+                name: user.name || 'Student',
                 email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
                 userType: user.userType,
+                createdAt: user.createdAt,
                 token: generateToken(user._id),
             });
         }
@@ -84,7 +91,10 @@ const loginUser = async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
                 userType: user.userType,
+                createdAt: user.createdAt,
                 token: generateToken(user._id),
             });
         } else {
@@ -233,6 +243,35 @@ const updateProfile = async (req, res) => {
     }
 };
 
+// @desc    Get user profile
+// @route   GET /api/auth/profile
+// @access  Private
+const getProfile = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Get user from database
+        const user = await User.findById(userId).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
+                userType: user.userType,
+                createdAt: user.createdAt
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
@@ -240,5 +279,6 @@ module.exports = {
     sendOTP,
     sendPasswordResetOTP,
     resetPassword,
-    updateProfile
+    updateProfile,
+    getProfile
 };

@@ -74,7 +74,10 @@
         </div>
     </main>
 
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="script.js"></script>
+    <script src="payment.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             checkAuthStatus();
@@ -82,6 +85,10 @@
             const courseId = urlParams.get('id');
             if (courseId) {
                 loadCourseDetail(courseId);
+                // Check for pending payments on page load
+                setTimeout(() => {
+                    checkForPendingPayment(courseId);
+                }, 1000);
             } else {
                 window.location.href = 'courses.html';
             }

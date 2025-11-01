@@ -20,14 +20,13 @@
         <div class="nav-links">
             <a href="index.html" class="active">Home</a>
             <a href="courses.html">Courses</a>
-            <a href="chatbot.html">AI Assistant</a>
+            <a href="chatbot.html" id="ai-assistant-link" style="display: none;">AI Assistant</a>
             <a href="#about">About</a>
             <a href="#contact">Contact</a>
             <a href="javascript:void(0)" id="dashboard-link" style="display: none;"></a>
             <div class="auth-buttons">
                 <div id="logged-out-nav" style="display: flex; gap: 1rem;">
-                    <a href="login.html" class="cta-secondary">Login</a>
-                    <a href="Signup.html" class="cta-primary">Sign Up</a>
+                    <a href="login.html" class="cta-primary">Login</a>
                 </div>
                 <div id="logged-in-nav" style="display: none; gap: 1rem; align-items: center;">
                     <!-- Notification Bell -->
@@ -120,7 +119,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="#enroll" class="enroll-btn">Explore Class 6</a>
+                        <a href="courses.html?class=6" class="enroll-btn">Explore Class 6</a>
                         <span class="course-meta">4 Subjects • Live Classes</span>
                     </div>
                 </div>
@@ -151,7 +150,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="#enroll" class="enroll-btn">Explore Class 7</a>
+                        <a href="courses.html?class=7" class="enroll-btn">Explore Class 7</a>
                         <span class="course-meta">4 Subjects • Live Classes</span>
                     </div>
                 </div>
@@ -182,7 +181,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="#enroll" class="enroll-btn">Explore Class 8</a>
+                        <a href="courses.html?class=8" class="enroll-btn">Explore Class 8</a>
                         <span class="course-meta">4 Subjects • Live Classes</span>
                     </div>
                 </div>
@@ -213,7 +212,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="#enroll" class="enroll-btn">Explore Class 9</a>
+                        <a href="courses.html?class=9" class="enroll-btn">Explore Class 9</a>
                         <span class="course-meta">4 Subjects • Board Prep</span>
                     </div>
                 </div>
@@ -245,7 +244,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="#enroll" class="enroll-btn">Explore Class 10</a>
+                        <a href="courses.html?class=10" class="enroll-btn">Explore Class 10</a>
                         <span class="course-meta">4 Subjects • Board Prep</span>
                     </div>
                 </div>
@@ -276,7 +275,7 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="#enroll" class="enroll-btn">Explore Class 11</a>
+                        <a href="courses.html?class=11" class="enroll-btn">Explore Class 11</a>
                         <span class="course-meta">4 Subjects • JEE/NEET Prep</span>
                     </div>
                 </div>
@@ -308,8 +307,8 @@
                         </div>
                     </div>
                     <div class="card-footer">
-                        <a href="#enroll" class="enroll-btn">Explore Class 12</a>
-                        <span class="course-meta">4 Subjects • JEE/NEET Prep</span>
+                        <a href="courses.html?class=12" class="enroll-btn">Explore Class 12</a>
+                        <span class="course-meta">4 Subjects • Entrance Prep</span>
                     </div>
                 </div>
             </div>
@@ -483,18 +482,26 @@
         <section id="contact" class="contact">
             <h2>Start Your Learning Journey</h2>
             <p>Get personalized guidance for your career growth</p>
-            <div class="contact-form">
-                <input type="text" placeholder="Your Name" required>
-                <input type="email" placeholder="Your Email" required>
-                <input type="tel" placeholder="Your Phone" required>
-                <select id="course-select" name="course" required aria-label="Select a course">
+            <form class="contact-form" id="contactForm">
+                <input type="text" id="contact-name" name="name" placeholder="Your Name" required>
+                <input type="email" id="contact-email" name="email" placeholder="Your Email" required>
+                <input type="tel" id="contact-phone" name="phone" placeholder="Your Phone" pattern="[0-9]{10}" required>
+                <select id="contact-course" name="course" required aria-label="Select a course">
                     <option value="">Select Course</option>
                     <option value="web">Web Development</option>
                     <option value="data">Data Science</option>
                     <option value="blockchain">Blockchain</option>
+                    <option value="class-6">Class 6</option>
+                    <option value="class-7">Class 7</option>
+                    <option value="class-8">Class 8</option>
+                    <option value="class-9">Class 9</option>
+                    <option value="class-10">Class 10</option>
+                    <option value="class-11">Class 11</option>
+                    <option value="class-12">Class 12</option>
                 </select>
+                <textarea id="contact-message" name="message" placeholder="Your Message (Optional)" rows="3"></textarea>
                 <button type="submit" class="contact-btn">Request Callback</button>
-            </div>
+            </form>
         </section>
     </main>
 

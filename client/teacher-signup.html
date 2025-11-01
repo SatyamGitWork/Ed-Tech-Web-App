@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Sign Up - Ed-Tech</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <style>
+        /* Modern Teacher Signup Page Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+
+        /* Animated Background Shapes */
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        body::before {
+            width: 400px;
+            height: 400px;
+            top: -200px;
+            right: -200px;
+            animation-delay: 1s;
+        }
+
+        body::after {
+            width: 300px;
+            height: 300px;
+            bottom: -150px;
+            left: -150px;
+            animation-delay: 3s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(40px, -40px) rotate(180deg); }
+        }
+
+        #loginbox {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            padding: 0;
+            margin: 20px;
+            animation: slideUp 0.6s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #loginbox fieldset {
+            border: none;
+            padding: 40px;
+            margin: 0;
+        }
+
+        .logo-link {
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .edtech-logo {
+            width: 80px;
+            height: 80px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        legend h2 {
+            color: #333;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .teacher-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .edtech-tagline {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .signup-form label {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .signup-form input,
+        .signup-form select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+
+        .signup-form input:focus,
+        .signup-form select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .signup-form select {
+            cursor: pointer;
+            background: white;
+        }
+
+        .email-otp-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+
+        .email-otp-row input {
+            margin-bottom: 0;
+        }
+
+        .otp-button {
+            padding: 14px 20px !important;
+            white-space: nowrap;
+            margin-bottom: 0 !important;
+            font-size: 14px !important;
+        }
+
+        #otpsection {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-bottom: 0;
+        }
+
+        .signup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .signup-btn:active {
+            transform: translateY(0);
+        }
+
+        .signup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .switch-auth {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin: 20px 0 0 0;
+        }
+
+        .switch-auth a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .switch-auth a:hover {
+            color: #764ba2;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            #loginbox fieldset {
+                padding: 30px 25px;
+            }
+
+            legend h2 {
+                font-size: 24px;
+            }
+
+            .edtech-logo {
+                width: 60px;
+                height: 60px;
+            }
+
+            .email-otp-row {
+                grid-template-columns: 1fr;
+            }
+
+            .otp-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loginbox">
+        <fieldset>
+            <legend>
+                <a href="index.html" class="logo-link">
+                    <img src="https://img.icons8.com/color/96/000000/graduation-cap.png" alt="Ed-Tech Logo" class="edtech-logo">
+                    <h2>Join as Teacher</h2>
+                    <span class="teacher-badge">🎓 Educator Account</span>
+                </a>
+            </legend>
+            <p class="edtech-tagline">Share your knowledge and inspire students worldwide!</p>
+            <form onsubmit="return validateTeacherSignup(event)" class="signup-form">
+                <label for="name">Full Name *</label>
+                <input type="text" id="name" placeholder="Enter your full name" required>
+
+                <label for="email">Email Address *</label>
+                <div class="email-otp-row">
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                    <button type="button" onclick="showotp()" class="signup-btn otp-button">Get OTP</button>
+                </div>
+
+                <div id="otpsection">
+                    <label for="OTP">Enter OTP *</label>
+                    <input type="number" id="OTP" min="100000" max="999999" placeholder="6-digit OTP">
+                </div>
+
+                <label for="password">Password *</label>
+                <input type="password" id="password" placeholder="Create a password (min. 6 characters)" required minlength="6">
+
+                <label for="mobile">Mobile Number *</label>
+                <input type="tel" id="mobile" placeholder="e.g. 9876543210" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
+
+                <label for="dob">Date of Birth *</label>
+                <input type="date" id="dob" required>
+
+                <label for="qualification">Highest Qualification (Optional)</label>
+                <input type="text" id="qualification" placeholder="e.g. M.Sc, Ph.D., B.Tech">
+
+                <label for="experience">Teaching Experience (Optional)</label>
+                <input type="text" id="experience" placeholder="e.g. 5 years">
+
+                <button type="submit" class="signup-btn">Create Teacher Account</button>
+                
+                <p class="switch-auth">
+                    Already have an account? <a href="login.html">Login</a>
+                </p>
+                
+                <p class="switch-auth">
+                    Are you a student? <a href="Signup.html">Sign up as Student</a>
+                </p>
+            </form>
+        </fieldset>
+    </div>
+
+    <script>
+        // Teacher-specific signup validation
+        async function validateTeacherSignup(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const mobile = document.getElementById('mobile').value;
+            const dob = document.getElementById('dob').value;
+            const password = document.getElementById('password').value;
+            const otp = document.getElementById('OTP').value;
+            const qualification = document.getElementById('qualification')?.value || '';
+            const experience = document.getElementById('experience')?.value || '';
+            let isValid = true;
+            
+            // Clear previous errors
+            clearErrors();
+            
+            // Name validation
+            if (name.length < 2) {
+                showToast('Name must be at least 2 characters long', 'error');
+                isValid = false;
+            }
+            
+            // Email validation
+            if (!isValidEmail(email)) {
+                showToast('Please enter a valid email address', 'error');
+                isValid = false;
+            }
+            
+            // Mobile validation
+            if (!isValidMobile(mobile)) {
+                showToast('Please enter a valid 10-digit mobile number', 'error');
+                isValid = false;
+            }
+            
+            // DOB validation
+            if (!isValidAge(dob)) {
+                showToast('You must be at least 13 years old to register', 'error');
+                isValid = false;
+            }
+
+            // Password validation
+            if (password && password.length < 6) {
+                showToast('Password must be at least 6 characters long', 'error');
+                isValid = false;
+            }
+
+            // OTP validation
+            if (!otp || otp.length !== 6) {
+                showToast('Please enter the 6-digit OTP sent to your email', 'error');
+                isValid = false;
+            }
+            
+            if (isValid) {
+                const submitBtn = document.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating account...';
+                
+                try {
+                    // Verify OTP first
+                    const otpRes = await fetch(`http://localhost:5000/api/auth/verify-otp`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, otp })
+                    });
+                    const otpData = await otpRes.json();
+                    
+                    if (!otpRes.ok || !otpData.verified) {
+                        showToast(otpData.message || 'Invalid OTP. Please check and try again.', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                        return false;
+                    }
+                    
+                    // Register the teacher
+                    const response = await fetch(`http://localhost:5000/api/auth/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            name,
+                            email,
+                            password,
+                            mobile,
+                            dob,
+                            userType: 'teacher',
+                            qualification,
+                            experience
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showToast('🎉 Teacher account created successfully! Redirecting to login...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        showToast(data.message || 'Registration failed. Please try again.', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                } catch (error) {
+                    showToast('Server error. Please check your connection and try again.', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            }
+            
+            return false;
+        }
+    </script>
+</body>
+
+</html>

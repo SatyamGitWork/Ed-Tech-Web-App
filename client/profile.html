@@ -359,8 +359,6 @@
         // Load user profile
         async function loadUserProfile() {
             const token = localStorage.getItem('userToken');
-            const userName = localStorage.getItem('userName');
-            const userType = localStorage.getItem('userType');
             const userId = localStorage.getItem('userId');
 
             if (!token || !userId) {
@@ -368,37 +366,84 @@
                 return;
             }
 
-            // For now, use localStorage data since we don't have a profile endpoint
-            // Update profile header
-            document.getElementById('profile-name').textContent = userName || 'User';
-            document.getElementById('profile-email').textContent = localStorage.getItem('userEmail') || 'Not available';
-            document.getElementById('profile-role').textContent = userType || 'student';
-            document.getElementById('profile-role').className = `profile-badge ${userType}`;
+            let userType = localStorage.getItem('userType'); // Get userType early for fallback
 
-            // Update form fields with available data
-            document.getElementById('name').value = userName || 'Not available';
-            document.getElementById('email').value = localStorage.getItem('userEmail') || 'Not available';
-            document.getElementById('mobile').value = localStorage.getItem('userMobile') || 'Not provided';
-            document.getElementById('dob').value = localStorage.getItem('userDob') ? localStorage.getItem('userDob').split('T')[0] : '';
-            document.getElementById('userType').value = userType === 'teacher' ? 'Teacher' : 'Student';
+            try {
+                // Fetch fresh profile data from API
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
 
-            // Update stats
-            if (userType === 'teacher') {
-                document.getElementById('courses-label').textContent = 'Courses Created';
-            } else {
-                document.getElementById('courses-label').textContent = 'Courses Enrolled';
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile');
+                }
+
+                const data = await response.json();
+                const user = data.user;
+
+                // Update localStorage with fresh data
+                localStorage.setItem('userName', user.name || 'User');
+                localStorage.setItem('userEmail', user.email);
+                localStorage.setItem('userMobile', user.mobile || '');
+                localStorage.setItem('userDob', user.dob || '');
+                localStorage.setItem('userType', user.userType);
+                localStorage.setItem('userCreatedAt', user.createdAt || '');
+
+                // Update userType variable with fresh data
+                userType = user.userType;
+
+                // Update profile header
+                document.getElementById('profile-name').textContent = user.name || 'User';
+                document.getElementById('profile-email').textContent = user.email;
+                document.getElementById('profile-role').textContent = user.userType;
+                document.getElementById('profile-role').className = `profile-badge ${user.userType}`;
+                document.getElementById('user-name').textContent = user.name || 'User';
+
+                // Update form fields
+                document.getElementById('name').value = user.name || '';
+                document.getElementById('email').value = user.email;
+                document.getElementById('mobile').value = user.mobile || '';
+                document.getElementById('dob').value = user.dob ? user.dob.split('T')[0] : '';
+                document.getElementById('userType').value = user.userType === 'teacher' ? 'Teacher' : 'Student';
+
+                // Update stats
+                if (user.userType === 'teacher') {
+                    document.getElementById('courses-label').textContent = 'Courses Created';
+                } else {
+                    document.getElementById('courses-label').textContent = 'Courses Enrolled';
+                }
+
+                // Member since
+                if (user.createdAt) {
+                    const memberDate = new Date(user.createdAt);
+                    document.getElementById('member-since').textContent = memberDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                } else {
+                    document.getElementById('member-since').textContent = 'Recently';
+                }
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                // Fallback to localStorage if API fails
+                const userName = localStorage.getItem('userName');
+                const userEmail = localStorage.getItem('userEmail');
+
+                if (userName) {
+                    document.getElementById('profile-name').textContent = userName;
+                    document.getElementById('user-name').textContent = userName;
+                }
+                if (userEmail) {
+                    document.getElementById('profile-email').textContent = userEmail;
+                    document.getElementById('email').value = userEmail;
+                }
+                if (userType) {
+                    document.getElementById('profile-role').textContent = userType;
+                    document.getElementById('profile-role').className = `profile-badge ${userType}`;
+                }
             }
 
-            // Member since - use a default if not available
-            const createdAt = localStorage.getItem('userCreatedAt');
-            if (createdAt) {
-                const memberDate = new Date(createdAt);
-                document.getElementById('member-since').textContent = memberDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            } else {
-                document.getElementById('member-since').textContent = 'Recently';
-            }
-
-            // Load course count
+            // Load course count using the correct userType
             loadCourseCount(token, userType);
             
             // Load notification count
