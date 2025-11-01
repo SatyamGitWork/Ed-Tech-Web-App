@@ -24,6 +24,10 @@ const courseContentSchema = new mongoose.Schema({
     order: {
         type: Number,
         default: 0
+    },
+    driveFileId: {
+        type: String,
+        required: false // Google Drive file ID (if uploaded to Drive)
     }
 });
 

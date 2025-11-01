@@ -2031,6 +2031,93 @@ input:focus, select:focus {
     transform: scale(1.05);
 }
 
+/* Upload to Drive button */
+.btn-upload-drive {
+    background: linear-gradient(135deg, #4285f4, #34a853);
+    color: white;
+    border: none;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    margin-right: 0.5rem;
+    font-weight: 500;
+}
+
+.btn-upload-drive:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3367d6, #2d8a43);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(66, 133, 244, 0.3);
+}
+
+.btn-upload-drive:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Content item actions container */
+.content-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Badge styles */
+.badge-success {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.badge-warning {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+/* Content URL section */
+.content-url-section {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.content-link {
+    color: #6366f1;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.content-link:hover {
+    text-decoration: underline;
+}
+
+.content-link-drive {
+    color: #4285f4;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.content-link-drive:hover {
+    text-decoration: underline;
+}
+
+
 .btn-content {
     background: #17a2b8;
     color: white;

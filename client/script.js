@@ -904,8 +904,14 @@ function displayCourseContent(contentItems) {
     // Sort by order
     const sortedContent = [...contentItems].sort((a, b) => (a.order || 0) - (b.order || 0));
     
-    container.innerHTML = sortedContent.map((item, index) => `
-        <div class="content-item">
+    container.innerHTML = sortedContent.map((item, index) => {
+        const isGoogleDriveUrl = item.url && (item.url.includes('drive.google.com') || item.url.includes('googleapis.com'));
+        const driveStatus = isGoogleDriveUrl ? 
+            '<span class="badge-success" title="Stored in Google Drive">☁️ Google Drive</span>' : 
+            '<span class="badge-warning" title="External URL">🔗 External Link</span>';
+        
+        return `
+        <div class="content-item" id="content-${item._id}">
             <div class="content-item-header">
                 <div class="content-item-info">
                     <span class="content-type-icon">${getContentIcon(item.type)}</span>
@@ -915,15 +921,26 @@ function displayCourseContent(contentItems) {
                             <span class="badge-small">${item.type}</span>
                             ${item.duration ? `<span>⏱️ ${item.duration} min</span>` : ''}
                             <span>Order: ${item.order !== undefined ? item.order : index}</span>
+                            ${driveStatus}
                         </p>
                     </div>
                 </div>
-                <button onclick="deleteContentItem('${item._id}')" class="btn-delete-small" title="Delete">🗑️</button>
+                <div class="content-item-actions">
+                    ${!isGoogleDriveUrl && (item.type === 'video' || item.type === 'pdf') ? 
+                        `<button onclick="uploadContentToDrive('${item._id}', '${item.type}')" class="btn-upload-drive" title="Upload to Google Drive">
+                            ☁️ Upload to Drive
+                        </button>` : ''}
+                    <button onclick="deleteContentItem('${item._id}')" class="btn-delete-small" title="Delete">🗑️</button>
+                </div>
             </div>
             ${item.description ? `<p class="content-description">${item.description}</p>` : ''}
-            <p class="content-url"><a href="${item.url}" target="_blank">🔗 View Content</a></p>
+            <div class="content-url-section">
+                <a href="${item.url}" target="_blank" class="content-link">🔗 View Content</a>
+                ${isGoogleDriveUrl ? `<a href="${item.url}" target="_blank" class="content-link-drive">📂 Open in Drive</a>` : ''}
+            </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Get icon for content type
@@ -1032,6 +1049,119 @@ async function deleteContentItem(contentId) {
         alert('Failed to delete content');
     }
 }
+
+// Upload content to Google Drive
+async function uploadContentToDrive(contentId, contentType) {
+    const courseId = currentCourseForContent;
+    const contentItem = document.getElementById(`content-${contentId}`);
+    
+    if (!confirm('This will download the file and re-upload it to your Google Drive. Continue?')) {
+        return;
+    }
+    
+    // Show loading state
+    const uploadBtn = contentItem.querySelector('.btn-upload-drive');
+    const originalText = uploadBtn.innerHTML;
+    uploadBtn.innerHTML = '⏳ Uploading...';
+    uploadBtn.disabled = true;
+    
+    try {
+        // First, get the current content details
+        const response = await fetch(`${API_URL}/courses/${courseId}`, {
+            headers: getAuthHeaders()
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch course details');
+        }
+        
+        const courseData = await response.json();
+        const content = courseData.course.content.find(c => c._id === contentId);
+        
+        if (!content) {
+            throw new Error('Content not found');
+        }
+        
+        // Download the file from the URL
+        uploadBtn.innerHTML = '⏳ Downloading...';
+        const fileResponse = await fetch(content.url);
+        
+        if (!fileResponse.ok) {
+            throw new Error('Failed to download file from URL');
+        }
+        
+        const blob = await fileResponse.blob();
+        
+        // Determine file name and extension
+        let fileName = content.title;
+        const urlParts = content.url.split('/');
+        const urlFileName = urlParts[urlParts.length - 1];
+        
+        if (contentType === 'video') {
+            if (!fileName.match(/\.(mp4|mov|avi|mkv|webm)$/i)) {
+                fileName += '.mp4'; // Default to .mp4 if no extension
+            }
+        } else if (contentType === 'pdf') {
+            if (!fileName.endsWith('.pdf')) {
+                fileName += '.pdf';
+            }
+        }
+        
+        // Create FormData and upload to Google Drive
+        uploadBtn.innerHTML = '☁️ Uploading to Drive...';
+        const formData = new FormData();
+        formData.append('file', blob, fileName);
+        
+        const uploadEndpoint = contentType === 'video' ? 
+            `${API_URL}/upload/video` : 
+            `${API_URL}/upload/document`;
+        
+        const uploadResponse = await fetch(uploadEndpoint, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+            },
+            body: formData
+        });
+        
+        if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.message || 'Upload to Drive failed');
+        }
+        
+        const uploadData = await uploadResponse.json();
+        
+        // Update the content URL with the Google Drive link
+        uploadBtn.innerHTML = '⏳ Updating...';
+        const updateResponse = await fetch(`${API_URL}/courses/${courseId}/content/${contentId}`, {
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+                url: uploadData.url,
+                driveFileId: uploadData.fileId
+            })
+        });
+        
+        if (!updateResponse.ok) {
+            throw new Error('Failed to update content URL');
+        }
+        
+        const updateData = await updateResponse.json();
+        
+        // Success! Refresh the content list
+        alert('✅ File uploaded to Google Drive successfully!');
+        displayCourseContent(updateData.course.content || []);
+        
+    } catch (error) {
+        console.error('Error uploading to Drive:', error);
+        alert(`Failed to upload to Google Drive: ${error.message}`);
+        
+        // Restore button state
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
+    }
+}
+
 
 // ========== FILE UPLOAD FUNCTIONALITY ==========
 

@@ -17,9 +17,18 @@ const { protect, teacherOnly, studentOnly, adminOnly } = require('./middleware/a
 
 const app = express();
 const server = http.createServer(app);
+
+// Allow multiple origins (localhost and production)
+const allowedOrigins = [
+    'http://localhost:5000',
+    'http://127.0.0.1:5500',
+    'http://localhost:5500',
+    'https://ed-tech-web-app-79a4.onrender.com'
+];
+
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5000",
+        origin: allowedOrigins,
         methods: ["GET", "POST"],
         credentials: true
     },
@@ -37,13 +46,6 @@ app.disable('x-powered-by');
 connectDB();
 
 // Middleware - Apply in correct order
-// Allow multiple origins (localhost and production)
-const allowedOrigins = [
-    'http://localhost:5000',
-    'http://127.0.0.1:5500',
-    'http://localhost:5500',
-    'https://ed-tech-web-app-79a4.onrender.com'
-];
 
 app.use(cors({
     origin: function(origin, callback) {
@@ -114,6 +116,7 @@ app.put('/api/courses/:id', protect, teacherOnly, courseController.updateCourse)
 app.delete('/api/courses/:id', protect, teacherOnly, courseController.deleteCourse);
 app.get('/api/courses/my/created', protect, teacherOnly, courseController.getMyCreatedCourses);
 app.post('/api/courses/:id/content', protect, teacherOnly, courseController.addCourseContent);
+app.put('/api/courses/:id/content/:contentId', protect, teacherOnly, courseController.updateCourseContent);
 app.delete('/api/courses/:id/content/:contentId', protect, teacherOnly, courseController.deleteContentFromCourse);
 app.get('/api/courses/:id/stats', protect, teacherOnly, courseController.getCourseStats);
 

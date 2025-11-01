@@ -495,6 +495,67 @@ const deleteContentFromCourse = async (req, res) => {
     }
 };
 
+// @desc    Update content item in course
+// @route   PUT /api/courses/:id/content/:contentId
+// @access  Private/Teacher
+const updateCourseContent = async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id);
+
+        if (!course) {
+            return res.status(404).json({
+                success: false,
+                message: 'Course not found'
+            });
+        }
+
+        // Check if user is the course teacher
+        if (course.teacher.toString() !== req.user._id.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: 'Not authorized to update content in this course'
+            });
+        }
+
+        // Find the content item
+        const contentItem = course.content.find(
+            item => item._id.toString() === req.params.contentId
+        );
+
+        if (!contentItem) {
+            return res.status(404).json({
+                success: false,
+                message: 'Content item not found'
+            });
+        }
+
+        // Update content fields
+        const { url, title, description, duration, order, driveFileId } = req.body;
+        
+        if (url !== undefined) contentItem.url = url;
+        if (title !== undefined) contentItem.title = title;
+        if (description !== undefined) contentItem.description = description;
+        if (duration !== undefined) contentItem.duration = duration;
+        if (order !== undefined) contentItem.order = order;
+        if (driveFileId !== undefined) contentItem.driveFileId = driveFileId;
+
+        await course.save();
+
+        res.json({
+            success: true,
+            message: 'Content updated successfully',
+            course
+        });
+    } catch (error) {
+        console.error('Error updating content:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update content',
+            error: error.message
+        });
+    }
+};
+
 // @desc    Schedule a live class for course
 // @route   POST /api/courses/:id/live-class
 // @access  Private/Teacher
@@ -1290,6 +1351,7 @@ module.exports = {
     enrollInCourse,
     getMyEnrolledCourses,
     addCourseContent,
+    updateCourseContent,
     deleteContentFromCourse,
     getCourseStats,
     scheduleLiveClass,

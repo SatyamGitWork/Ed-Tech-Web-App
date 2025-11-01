@@ -151,7 +151,7 @@ paymentSchema.pre('save', function(next) {
 
 // Index for faster queries
 paymentSchema.index({ user: 1, course: 1 });
-paymentSchema.index({ orderId: 1 });
+// orderId index removed - already created by unique: true in schema
 paymentSchema.index({ status: 1 });
 
 const Payment = mongoose.model('Payment', paymentSchema);
