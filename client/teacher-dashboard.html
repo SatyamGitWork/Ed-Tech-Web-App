@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Ed-Tech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-logo">
+            <a href="index.html" class="nav-logo-link">
+                <img src="https://img.icons8.com/color/96/000000/graduation-cap.png" alt="Ed-Tech Logo" class="nav-logo-img">
+                <span class="nav-logo-text">Ed-Tech</span>
+            </a>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="teacher-dashboard.html" class="active">Dashboard</a>
+            <a href="chatbot.html">AI Assistant</a>
+            <div class="auth-buttons">
+                <div id="logged-in-nav" style="display: flex; gap: 1rem; align-items: center;">
+                    <div class="notification-container" id="notification-bell">
+                        <div class="notification-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="notification-badge" id="notification-count"></span>
+                        </div>
+                        <div class="notification-dropdown" id="notification-dropdown">
+                            <div class="notification-header">
+                                <h3>Notifications</h3>
+                                <button id="mark-all-read" class="mark-all-read-btn">Mark all as read</button>
+                            </div>
+                            <div class="notification-list" id="notification-list"></div>
+                            <div class="notification-footer">
+                                <a href="notifications.html">View all notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <button id="user-name" class="nav-username" onclick="toggleUserMenu()"></button>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <a href="profile.html" class="user-dropdown-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                Profile
+                            </a>
+                            <a href="#" onclick="handleLogout(); return false;" class="user-dropdown-item logout">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <!-- Dashboard Header with Welcome Section -->
+        <div class="dashboard-welcome">
+            <div class="welcome-content">
+                <h1>Welcome back, <span id="teacher-name">Teacher</span>! 👋</h1>
+                <p class="welcome-subtitle">Here's what's happening with your courses today</p>
+            </div>
+            <button onclick="showCreateCourseModal()" class="btn-create-course">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Create New Course
+            </button>
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="dashboard-stats">
+            <div class="stat-card stat-primary">
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <h3 id="totalCourses">0</h3>
+                    <p>Total Courses</p>
+                    <span class="stat-trend positive">+2 this month</span>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-success">
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <h3 id="totalStudents">0</h3>
+                    <p>Total Students</p>
+                    <span class="stat-trend positive">+12 this week</span>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-warning">
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <h3 id="avgRating">0.0</h3>
+                    <p>Average Rating</p>
+                    <span class="stat-trend neutral">Out of 5.0</span>
+                </div>
+            </div>
+            
+            <div class="stat-card stat-info">
+                <div class="stat-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <div class="stat-details">
+                    <h3 id="upcomingClasses">0</h3>
+                    <p>Upcoming Classes</p>
+                    <span class="stat-trend neutral">This week</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="quick-actions-section">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="quick-actions-grid">
+                <button onclick="showCreateCourseModal()" class="action-card">
+                    <div class="action-icon action-primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="action-content">
+                        <h3>Create Course</h3>
+                        <p>Start a new course for your students</p>
+                    </div>
+                </button>
+                
+                <button onclick="showQuickStartLiveModal()" class="action-card">
+                    <div class="action-icon action-danger">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                        </svg>
+                    </div>
+                    <div class="action-content">
+                        <h3>Start Live Class</h3>
+                        <p>Go live and teach in real-time</p>
+                    </div>
+                </button>
+                
+                <button onclick="navigateToPage('chatbot.html')" class="action-card">
+                    <div class="action-icon action-info">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="action-content">
+                        <h3>AI Assistant</h3>
+                        <p>Get help with course content</p>
+                    </div>
+                </button>
+                
+                <button onclick="navigateToPage('profile.html')" class="action-card">
+                    <div class="action-icon action-success">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="action-content">
+                        <h3>My Profile</h3>
+                        <p>View and edit your profile</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- My Courses Section -->
+        <div class="courses-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">My Courses</h2>
+                    <p class="section-subtitle">Manage and track your course performance</p>
+                </div>
+                <div class="view-toggle">
+                    <button class="toggle-btn active" onclick="toggleView('grid')" id="gridViewBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </button>
+                    <button class="toggle-btn" onclick="toggleView('list')" id="listViewBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="myCoursesList" class="courses-grid">
+                <!-- Courses will be loaded here dynamically -->
+                <div class="empty-state" id="emptyState">
+                    <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                    </svg>
+                    <h3>No courses yet</h3>
+                    <p>Create your first course to get started</p>
+                    <button onclick="showCreateCourseModal()" class="cta-primary">Create Your First Course</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Course Modal -->
+    <div id="createCourseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCreateCourseModal()">&times;</span>
+            <h2>Create New Course</h2>
+            <form id="createCourseForm" onsubmit="return createCourse(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="courseTitle">Course Title *</label>
+                        <input type="text" id="courseTitle" required placeholder="e.g., Introduction to Algebra">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="courseDescription">Description *</label>
+                    <textarea id="courseDescription" required rows="4" placeholder="Describe what students will learn..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="courseCategory">Category *</label>
+                        <select id="courseCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Science">Science</option>
+                            <option value="English">English</option>
+                            <option value="Social Studies">Social Studies</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="Biology">Biology</option>
+                            <option value="History">History</option>
+                            <option value="Geography">Geography</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="courseClass">Class Level *</label>
+                        <select id="courseClass" required>
+                            <option value="">Select Class</option>
+                            <option value="6">Class 6</option>
+                            <option value="7">Class 7</option>
+                            <option value="8">Class 8</option>
+                            <option value="9">Class 9</option>
+                            <option value="10">Class 10</option>
+                            <option value="11">Class 11</option>
+                            <option value="12">Class 12</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="courseSubject">Subject *</label>
+                        <input type="text" id="courseSubject" required placeholder="e.g., Algebra">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="courseDifficulty">Difficulty *</label>
+                        <select id="courseDifficulty" required>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="coursePrice">Price (₹) *</label>
+                        <input type="number" id="coursePrice" required min="0" value="0" placeholder="0 for free">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="courseDuration">Duration (hours)</label>
+                        <input type="number" id="courseDuration" min="0" step="0.5" placeholder="e.g., 10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="courseThumbnail">Thumbnail URL</label>
+                    <input type="url" id="courseThumbnail" placeholder="https://example.com/image.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="courseRequirements">Requirements</label>
+                    <textarea id="courseRequirements" rows="2" placeholder="Any prerequisites or requirements..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="courseWhatYouLearn">What You Will Learn (comma separated)</label>
+                    <textarea id="courseWhatYouLearn" rows="3" placeholder="Topic 1, Topic 2, Topic 3..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="courseTags">Tags (comma separated)</label>
+                    <input type="text" id="courseTags" placeholder="algebra, mathematics, equations">
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" onclick="closeCreateCourseModal()" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="cta-primary">Create Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quick Start Live Stream Modal -->
+    <div id="quickStartLiveModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeQuickStartLiveModal()">&times;</span>
+            <h2>🎥 Start Live Class</h2>
+            <p class="modal-subtitle">Schedule and start a live class for your students</p>
+            <form id="quickStartLiveForm" onsubmit="return startQuickLiveStream(event)">
+                <div class="form-group">
+                    <label for="quickStreamCourse">Select Course *</label>
+                    <select id="quickStreamCourse" required>
+                        <option value="">Choose a course...</option>
+                        <!-- Courses will be loaded dynamically -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="quickStreamTitle">Class Title *</label>
+                    <input type="text" id="quickStreamTitle" placeholder="e.g., Introduction to React Hooks" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quickStreamDescription">Description</label>
+                    <textarea id="quickStreamDescription" rows="3" placeholder="Brief description of what you'll cover in this class..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quickStreamDate">Scheduled Date & Time *</label>
+                        <input type="datetime-local" id="quickStreamDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="quickStreamDuration">Duration (minutes) *</label>
+                        <input type="number" id="quickStreamDuration" min="15" max="300" value="60" placeholder="60" required>
+                    </div>
+                </div>
+
+                <div class="form-info">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>After scheduling, you'll be redirected to the live stream page to start broadcasting.</span>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" onclick="closeQuickStartLiveModal()" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-live">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 0.5rem;">
+                            <circle cx="12" cy="12" r="8"></circle>
+                        </svg>
+                        Schedule & Start Live Class
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Course Modal -->
+    <div id="editCourseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCourseModal()">&times;</span>
+            <h2>Edit Course</h2>
+            <form id="editCourseForm" onsubmit="return updateCourse(event)">
+                <input type="hidden" id="editCourseId">
+                
+                <!-- Same fields as create course -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCourseTitle">Course Title *</label>
+                        <input type="text" id="editCourseTitle" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editCourseDescription">Description *</label>
+                    <textarea id="editCourseDescription" required rows="4"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCoursePrice">Price (₹) *</label>
+                        <input type="number" id="editCoursePrice" required min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editCourseDuration">Duration (hours)</label>
+                        <input type="number" id="editCourseDuration" min="0" step="0.5">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" onclick="closeEditCourseModal()" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="cta-primary">Update Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Course Content Management Modal -->
+    <div id="contentModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close" onclick="closeContentModal()">&times;</span>
+            <h2>Manage Course Content</h2>
+            <p class="modal-subtitle" id="contentCourseTitle"></p>
+
+            <!-- Add Content Form -->
+            <div class="content-form-section">
+                <h3>Add New Content</h3>
+                <form id="addContentForm" onsubmit="return addCourseContentItem(event)">
+                    <input type="hidden" id="contentCourseId">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contentTitle">Content Title *</label>
+                            <input type="text" id="contentTitle" required placeholder="e.g., Introduction to Variables">
+                        </div>
+                        <div class="form-group">
+                            <label for="contentType">Type *</label>
+                            <select id="contentType" required onchange="handleContentTypeChange()">
+                                <option value="">Select Type</option>
+                                <option value="video">📹 Video</option>
+                                <option value="pdf">📄 PDF Document</option>
+                                <option value="assignment">📝 Assignment</option>
+                                <option value="text">📖 Text Content</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Upload Method Toggle -->
+                    <div class="form-group">
+                        <label>Content Source *</label>
+                        <div class="upload-method-toggle">
+                            <button type="button" class="toggle-btn active" onclick="toggleUploadMethod('url')" id="urlToggle">
+                                🔗 Paste URL
+                            </button>
+                            <button type="button" class="toggle-btn" onclick="toggleUploadMethod('upload')" id="uploadToggle">
+                                📤 Upload File
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- URL Input (default) -->
+                    <div class="form-group" id="urlInputGroup">
+                        <label for="contentUrl">Content URL *</label>
+                        <input type="url" id="contentUrl" placeholder="https://example.com/video.mp4 or PDF link">
+                        <small>Paste the direct link to your video, PDF, or resource</small>
+                    </div>
+
+                    <!-- File Upload Input (hidden by default) -->
+                    <div class="form-group" id="fileUploadGroup" style="display: none;">
+                        <label for="contentFile">Upload File *</label>
+                        <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('contentFile').click()">
+                            <input type="file" id="contentFile" accept="" style="display: none;" onchange="handleFileSelect(event)">
+                            <div class="upload-placeholder" id="uploadPlaceholder">
+                                <span class="upload-icon">📁</span>
+                                <p>Click to browse or drag & drop file here</p>
+                                <small id="uploadHint">Select content type first</small>
+                            </div>
+                            <div class="file-preview" id="filePreview" style="display: none;">
+                                <span class="file-icon" id="fileIcon">📄</span>
+                                <div class="file-info">
+                                    <p class="file-name" id="fileName"></p>
+                                    <p class="file-size" id="fileSize"></p>
+                                </div>
+                                <button type="button" class="remove-file-btn" onclick="removeSelectedFile(event)">✕</button>
+                            </div>
+                        </div>
+                        <div class="upload-progress" id="uploadProgress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <p class="progress-text" id="progressText">Uploading... 0%</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contentDescription">Description</label>
+                        <textarea id="contentDescription" rows="3" placeholder="Brief description of this content..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contentDuration">Duration (minutes)</label>
+                            <input type="number" id="contentDuration" min="0" placeholder="e.g., 15">
+                        </div>
+                        <div class="form-group">
+                            <label for="contentOrder">Order</label>
+                            <input type="number" id="contentOrder" min="0" placeholder="Leave blank for auto">
+                            <small>Order in which content appears</small>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="cta-primary">+ Add Content</button>
+                </form>
+            </div>
+
+            <!-- Existing Content List -->
+            <div class="content-list-section">
+                <h3>Course Content (<span id="contentCount">0</span>)</h3>
+                <div id="courseContentList">
+                    <!-- Content items will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Live Class Modal -->
+    <div id="scheduleLiveModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeScheduleLiveModal()">&times;</span>
+            <h2>Schedule Live Class</h2>
+            <form id="scheduleLiveForm" onsubmit="event.preventDefault(); scheduleLiveClass(this.closest('.modal').dataset.courseId);">
+                <div class="form-group">
+                    <label for="liveClassTitle">Class Title *</label>
+                    <input type="text" id="liveClassTitle" required placeholder="e.g., Introduction to Quadratic Equations">
+                </div>
+
+                <div class="form-group">
+                    <label for="liveClassDescription">Description</label>
+                    <textarea id="liveClassDescription" rows="3" placeholder="What will you teach in this live class..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="liveClassDate">Scheduled Date & Time *</label>
+                        <input type="datetime-local" id="liveClassDate" required>
+                        <small>Select when you want to go live</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="liveClassDuration">Duration (minutes) *</label>
+                        <input type="number" id="liveClassDuration" required min="15" max="240" value="60" placeholder="60">
+                        <small>Estimated class duration (15-240 min)</small>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <p>ℹ️ Students will receive a notification when you schedule this class.</p>
+                    <p>📌 When it's time, click "Start Stream" to go live.</p>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" onclick="closeScheduleLiveModal()" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="cta-primary">Schedule Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Check if user is logged in and is a teacher
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('userToken');
+            const userType = localStorage.getItem('userType');
+            const userName = localStorage.getItem('userName');
+            
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            if (userType !== 'teacher') {
+                alert('Access denied. This page is for teachers only.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Set teacher name
+            if (userName) {
+                document.getElementById('teacher-name').textContent = userName;
+            }
+            
+            checkAuthStatus();
+            loadTeacherDashboard();
+        });
+        
+        // Helper function for navigation
+        function navigateToPage(page) {
+            window.location.href = page;
+        }
+        
+        // Toggle between grid and list view
+        function toggleView(view) {
+            const coursesList = document.getElementById('myCoursesList');
+            const gridBtn = document.getElementById('gridViewBtn');
+            const listBtn = document.getElementById('listViewBtn');
+            
+            if (view === 'grid') {
+                coursesList.classList.remove('courses-list');
+                coursesList.classList.add('courses-grid');
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+            } else {
+                coursesList.classList.remove('courses-grid');
+                coursesList.classList.add('courses-list');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+            }
+        }
+
+        // Quick Start Live Stream Modal Functions
+        function showQuickStartLiveModal() {
+            const modal = document.getElementById('quickStartLiveModal');
+            modal.style.display = 'block';
+            
+            // Set minimum datetime to current time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); // Adjust for timezone
+            document.getElementById('quickStreamDate').min = now.toISOString().slice(0, 16);
+            
+            // Set default datetime to 1 hour from now
+            const defaultTime = new Date(Date.now() + 60 * 60 * 1000);
+            defaultTime.setMinutes(defaultTime.getMinutes() - defaultTime.getTimezoneOffset());
+            document.getElementById('quickStreamDate').value = defaultTime.toISOString().slice(0, 16);
+            
+            loadCoursesForQuickStart();
+        }
+
+        function closeQuickStartLiveModal() {
+            const modal = document.getElementById('quickStartLiveModal');
+            modal.style.display = 'none';
+            document.getElementById('quickStartLiveForm').reset();
+        }
+
+        async function loadCoursesForQuickStart() {
+            try {
+                const token = localStorage.getItem('userToken');
+                const response = await fetch(`${API_URL}/courses/my/created`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const courses = data.courses || [];
+                    const select = document.getElementById('quickStreamCourse');
+                    select.innerHTML = '<option value="">Choose a course...</option>';
+                    
+                    if (courses.length === 0) {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = 'No courses available. Create a course first.';
+                        option.disabled = true;
+                        select.appendChild(option);
+                        
+                        if (typeof showToast === 'function') {
+                            showToast('Please create a course before starting a live stream', 'warning');
+                        } else {
+                            alert('Please create a course before starting a live stream');
+                        }
+                    } else {
+                        courses.forEach(course => {
+                            const option = document.createElement('option');
+                            option.value = course._id;
+                            option.textContent = course.title;
+                            select.appendChild(option);
+                        });
+                    }
+                } else {
+                    throw new Error('Failed to fetch courses');
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                if (typeof showToast === 'function') {
+                    showToast('Failed to load courses. Please try again.', 'error');
+                } else {
+                    alert('Failed to load courses. Please try again.');
+                }
+            }
+        }
+
+        async function startQuickLiveStream(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('quickStreamTitle').value;
+            const description = document.getElementById('quickStreamDescription').value;
+            const courseId = document.getElementById('quickStreamCourse').value;
+            const scheduledDateInput = document.getElementById('quickStreamDate').value;
+            const duration = parseInt(document.getElementById('quickStreamDuration').value);
+
+            if (!title || !courseId || !scheduledDateInput || !duration) {
+                if (typeof showToast === 'function') {
+                    showToast('Please fill in all required fields', 'error');
+                } else {
+                    alert('Please fill in all required fields');
+                }
+                return false;
+            }
+
+            // Validate that scheduled date is in the future
+            const scheduledDate = new Date(scheduledDateInput);
+            const now = new Date();
+            
+            if (scheduledDate <= now) {
+                if (typeof showToast === 'function') {
+                    showToast('Scheduled date must be in the future', 'error');
+                } else {
+                    alert('Scheduled date must be in the future');
+                }
+                return false;
+            }
+
+            try {
+                const token = localStorage.getItem('userToken');
+                
+                // Create the live class for the selected course
+                const response = await fetch(`${API_URL}/courses/${courseId}/live-class`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        description: description || 'Live class session',
+                        scheduledDate: scheduledDate.toISOString(),
+                        duration
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Live class scheduled:', data);
+                    
+                    if (typeof showToast === 'function') {
+                        showToast('Live class scheduled successfully! Redirecting to stream page...', 'success');
+                    }
+                    closeQuickStartLiveModal();
+                    
+                    // Small delay to allow toast to show
+                    setTimeout(() => {
+                        window.location.href = `teacher-live-stream.html?courseId=${courseId}&liveClassId=${data.liveClass._id}`;
+                    }, 500);
+                } else {
+                    const error = await response.json();
+                    console.error('❌ Failed to schedule live class:', error);
+                    
+                    if (typeof showToast === 'function') {
+                        showToast(error.message || 'Failed to schedule live class', 'error');
+                    } else {
+                        alert(error.message || 'Failed to schedule live class');
+                    }
+                }
+            } catch (error) {
+                console.error('💥 Error scheduling live class:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack
+                });
+                
+                if (typeof showToast === 'function') {
+                    showToast('Network error: Could not schedule live class. Check console for details.', 'error');
+                } else {
+                    alert('An error occurred while scheduling the live class: ' + error.message);
+                }
+            }
+
+            return false;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const quickStartModal = document.getElementById('quickStartLiveModal');
+            if (event.target === quickStartModal) {
+                closeQuickStartLiveModal();
+            }
+        };
+    </script>
+</body>
+</html>

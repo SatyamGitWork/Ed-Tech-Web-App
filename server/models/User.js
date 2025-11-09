@@ -4,7 +4,11 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: function() {
+            // Name is only required for teachers during signup
+            // Students can add it later through profile update
+            return this.userType === 'teacher';
+        }
     },
     email: {
         type: String,
@@ -17,11 +21,11 @@ const userSchema = new mongoose.Schema({
     },
     dob: {
         type: Date,
-        required: true
+        required: false // Optional - can be added later
     },
     mobile: {
         type: String,
-        required: true
+        required: false // Optional - can be added later
     },
     userType: {
         type: String,

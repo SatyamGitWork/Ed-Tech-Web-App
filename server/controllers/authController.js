@@ -45,22 +45,29 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // Create user
-        const user = await User.create({
-            name,
+        // Create user with only provided fields
+        const userData = {
             email,
             password,
-            dob,
-            mobile,
-            userType
-        });
+            userType: userType || 'student'
+        };
+
+        // Add optional fields if provided
+        if (name) userData.name = name;
+        if (dob) userData.dob = dob;
+        if (mobile) userData.mobile = mobile;
+
+        const user = await User.create(userData);
 
         if (user) {
             res.status(201).json({
                 _id: user._id,
-                name: user.name,
+                name: user.name || 'Student',
                 email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
                 userType: user.userType,
+                createdAt: user.createdAt,
                 token: generateToken(user._id),
             });
         }
@@ -84,7 +91,10 @@ const loginUser = async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
                 userType: user.userType,
+                createdAt: user.createdAt,
                 token: generateToken(user._id),
             });
         } else {
@@ -121,9 +131,154 @@ const verifyOTP = async (req, res) => {
     }
 };
 
+// @desc    Send OTP for password reset
+// @route   POST /api/auth/forgot-password
+// @access  Public
+const sendPasswordResetOTP = async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        // Check if user exists
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'No account found with this email' });
+        }
+        
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        setOTP(email, otp);
+        
+        // Send OTP email
+        await sendOTPEmail(email, otp, 'Password Reset');
+        
+        res.json({ message: 'Password reset OTP sent to your email' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to send OTP', error: error.message });
+    }
+};
+
+// @desc    Reset password with OTP verification
+// @route   POST /api/auth/reset-password
+// @access  Public
+const resetPassword = async (req, res) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+        
+        // Verify OTP
+        const stored = getOTP(email);
+        if (!stored) {
+            return res.status(400).json({ message: 'No OTP found. Please request a new one.' });
+        }
+        
+        // Check OTP expiry (10 minutes)
+        if (Date.now() - stored.timestamp > 10 * 60 * 1000) {
+            clearOTP(email);
+            return res.status(400).json({ message: 'OTP expired. Please request a new one.' });
+        }
+        
+        // Validate OTP
+        if (stored.otp !== otp) {
+            return res.status(400).json({ message: 'Invalid OTP' });
+        }
+        
+        // Find user and update password
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        // Update password (will be auto-hashed by mongoose middleware)
+        user.password = newPassword;
+        await user.save();
+        
+        // Clear OTP after successful reset
+        clearOTP(email);
+        
+        res.json({ message: 'Password reset successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/update-profile
+// @access  Private
+const updateProfile = async (req, res) => {
+    try {
+        const { name, mobile, dob, currentPassword } = req.body;
+        const userId = req.user._id;
+
+        // Get user from database
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify current password
+        const isPasswordValid = await user.matchPassword(currentPassword);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Current password is incorrect' });
+        }
+
+        // Update user fields
+        if (name) user.name = name;
+        if (mobile) user.mobile = mobile;
+        if (dob) user.dob = dob;
+
+        await user.save();
+
+        res.json({
+            message: 'Profile updated successfully',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
+                userType: user.userType
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Get user profile
+// @route   GET /api/auth/profile
+// @access  Private
+const getProfile = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Get user from database
+        const user = await User.findById(userId).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                mobile: user.mobile,
+                dob: user.dob,
+                userType: user.userType,
+                createdAt: user.createdAt
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
     verifyOTP,
-    sendOTP
+    sendOTP,
+    sendPasswordResetOTP,
+    resetPassword,
+    updateProfile,
+    getProfile
 };
